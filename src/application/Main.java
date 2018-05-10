@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -14,6 +15,9 @@ import javafx.scene.shape.Rectangle;
 public class Main extends Application {
 	
 	public static Scene mainScene;
+	public static GridPane grid;
+	public static Scene HomeScene;
+	public static boolean gameOver = false;
 	public static Pane root;
 	public static Line l;
 	public static Rectangle rect;
@@ -25,17 +29,17 @@ public class Main extends Application {
 		try {
 			root = new BorderPane();
 			mainScene = new Scene(root,400,400);
+			HomeScene = new Scene(grid,400,400);
 			rect = new Rectangle(10,10,10,10);
 			root.getChildren().add(rect);
 
 			
 			bindPlayerControls();
 			
-			if(xVelocity>0) {
-				System.out.println("Right");
+			if(gameOver==false) {
+				primaryStage.setScene(mainScene);
 			}
 			
-			primaryStage.setScene(mainScene);
 			primaryStage.show();
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -44,8 +48,7 @@ public class Main extends Application {
 	
 	public static void bindPlayerControls() {
 		mainScene.addEventHandler(KeyEvent.KEY_PRESSED, event ->{
-			rect.setX(rect.getX()+xVelocity);
-			rect.setY(rect.getY()+yVelocity);
+		
 			switch(event.getCode()){
 				case UP:
 					yVelocity = -3;
@@ -60,7 +63,7 @@ public class Main extends Application {
 				case LEFT:
 					yVelocity = 0;
 					xVelocity = -3;				
-					break;
+				break;
 				
 				case RIGHT:
 					yVelocity = 0;
@@ -69,12 +72,16 @@ public class Main extends Application {
 				break;
 			}
 			
+			rect.setX(rect.getX()+xVelocity);
+			rect.setY(rect.getY()+yVelocity);
+			
 			
 		
 		});
 	
-		bindPlayerControls();
 	}
+	
+//	public static int get
 	
 	public static void main(String[] args) {
 		launch(args);
