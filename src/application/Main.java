@@ -25,8 +25,11 @@ public class Main extends Application {
 	public static Pane root;
 	public static Line l;
 	public static Rectangle rect;
+	public static Rectangle rect2;
 	public static int xVelocity = 0;
 	public static int yVelocity = 0;
+	public static double prevX = 0;
+	public static double prevY = 0;
 	public static File highscores;
 	
 	@Override
@@ -37,7 +40,10 @@ public class Main extends Application {
 			highscores = new File("C:\\\\Users\\\\justi\\\\eclipse-workspace\\\\ICS3U-Final-Project");
 //			HomeScene = new Scene(grid,400,400);
 			rect = new Rectangle(10,10,10,10);
-			root.getChildren().add(rect);
+			rect2 = new Rectangle(0,10,10,10);
+			root.getChildren().addAll(rect, rect2);
+			
+			
 
 			
 			bindPlayerControls();
@@ -56,26 +62,27 @@ public class Main extends Application {
 	
 	public static void bindPlayerControls() {
 		mainScene.addEventHandler(KeyEvent.KEY_PRESSED, event ->{
-		
+			setTrailer();
+
 			switch(event.getCode()){
 				case UP:
-					yVelocity = -3;
+					yVelocity = -10;
 					xVelocity = 0;
 				break;
 				
 				case DOWN:
-					yVelocity = 3;
+					yVelocity = 10;
 					xVelocity = 0;				
 				break;
 				
 				case LEFT:
 					yVelocity = 0;
-					xVelocity = -3;				
+					xVelocity = -10;				
 				break;
 				
 				case RIGHT:
 					yVelocity = 0;
-					xVelocity = 3;	
+					xVelocity = 10;	
 					System.out.println("RIGHT");
 				break;
 			}
@@ -84,9 +91,18 @@ public class Main extends Application {
 			rect.setY(rect.getY()+yVelocity);
 			
 			
+
+			
 		
 		});
 	
+	}
+	public static void setTrailer() {
+		prevX = rect.getX();
+		prevY = rect.getY();
+		rect2.setX(prevX);
+		rect2.setY(prevY);
+		System.out.print("yes");
 	}
 	
 //	public static int getHighScore() {
