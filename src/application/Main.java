@@ -1,5 +1,8 @@
 package application;
 	
+import java.io.File;
+import java.util.Scanner;
+
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -17,19 +20,22 @@ public class Main extends Application {
 	public static Scene mainScene;
 	public static GridPane grid;
 	public static Scene HomeScene;
-	public static boolean gameOver = false;
+	public static boolean gameOver;
+	public static int HighScore =0;
 	public static Pane root;
 	public static Line l;
 	public static Rectangle rect;
 	public static int xVelocity = 0;
 	public static int yVelocity = 0;
+	public static File highscores;
 	
 	@Override
 	public void start(Stage primaryStage) {
 		try {
 			root = new BorderPane();
 			mainScene = new Scene(root,400,400);
-			HomeScene = new Scene(grid,400,400);
+			highscores = new File("C:\\\\Users\\\\justi\\\\eclipse-workspace\\\\ICS3U-Final-Project");
+//			HomeScene = new Scene(grid,400,400);
 			rect = new Rectangle(10,10,10,10);
 			root.getChildren().add(rect);
 
@@ -38,6 +44,8 @@ public class Main extends Application {
 			
 			if(gameOver==false) {
 				primaryStage.setScene(mainScene);
+			} else {
+//				System.out.println(HighScore+getHighScore());
 			}
 			
 			primaryStage.show();
@@ -81,7 +89,19 @@ public class Main extends Application {
 	
 	}
 	
-//	public static int get
+//	public static int getHighScore() {
+//		Scanner sc = new Scanner(highscores);
+//		int scoreA = 0;
+//		int scoreB = 0;
+//		int highScore = 0;
+//		while(sc.hasNext()) {
+//			scoreA = sc.nextInt();
+//			highScore = Math.max(scoreA, scoreB);
+//			scoreB = scoreA;
+//		}
+//		
+//		return highScore;
+//	}
 	
 	public static void main(String[] args) {
 		launch(args);
