@@ -11,6 +11,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
@@ -42,7 +43,12 @@ public class Main extends Application {
 			
 			for(int i = 0 ;i<rect.length;i++) {
 				rect[i] = new Rectangle(10,10,10,10);
+				rect[i].setFill(Color.BLACK);
 				root.getChildren().add(rect[i]);
+			}
+			for(int i = 2 ;i<rect.length;i++) {
+				rect[i].setX(rect[i-1].getX());
+				rect[i].setY(rect[i-1].getY());
 			}
 			
 			bindPlayerControls();
@@ -65,24 +71,31 @@ public class Main extends Application {
 
 			switch(event.getCode()){
 				case UP:
-					
-					yVelocity = -10;
-					xVelocity = 0;
+					if(yVelocity <= 0) {
+						yVelocity = -10;
+						xVelocity = 0;
+					}
 				break;
 				
 				case DOWN:
-					yVelocity = 10;
-					xVelocity = 0;				
+					if(yVelocity >= 0) {
+						yVelocity = 10;
+						xVelocity = 0;
+					}			
 				break;
 				
 				case LEFT:
-					yVelocity = 0;
-					xVelocity = -10;				
+					if(xVelocity <= 0) {
+						yVelocity = 0;
+						xVelocity = -10;
+					}				
 				break;
 				
 				case RIGHT:
-					yVelocity = 0;
-					xVelocity = 10;	
+					if(xVelocity >= 0) {
+						yVelocity = 0;
+						xVelocity = 10;
+					}	
 					//System.out.println("RIGHT");
 				break;
 			}
