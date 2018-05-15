@@ -25,7 +25,7 @@ public class Main extends Application {
 	public static int HighScore =0;
 	public static Pane root;
 	public static Line l;
-	public static Rectangle [] rect = new Rectangle [100];
+	public static Rectangle [] rect = new Rectangle [10];
 	//public static Rectangle rect2;
 	public static int xVelocity = 0;
 	public static int yVelocity = 0;
@@ -43,13 +43,14 @@ public class Main extends Application {
 			
 			for(int i = 0 ;i<rect.length;i++) {
 				rect[i] = new Rectangle(10,10,10,10);
-				rect[i].setFill(Color.BLACK);
 				root.getChildren().add(rect[i]);
 			}
-			for(int i = 2 ;i<rect.length;i++) {
-				rect[i].setX(rect[i-1].getX());
-				rect[i].setY(rect[i-1].getY());
+			for(int i = 0 ;i<rect.length;i++) {
+				rect[i].setX(rect[0].getX()+10*i);
+				//rect[i].setFill(Color.BLACK);
 			}
+			rect[0].setFill(Color.RED);
+			
 			
 			bindPlayerControls();
 			
@@ -102,14 +103,14 @@ public class Main extends Application {
 			
 			rect[0].setX(rect[0].getX()+xVelocity);
 			rect[0].setY(rect[0].getY()+yVelocity);
-		
+			
 		});
 	}
 	
 	public static void setTrailer() {
-		for(int i = 1 , j = 0 ;i < rect.length ; i++ , j++) {
-			prevX = rect[j].getX();
-			prevY = rect[j].getY();
+		for(int i = 1;i < rect.length ; i++) {
+			prevX = rect[i-1].getX();
+			prevY = rect[i-1].getY();
 			rect[i].setX(prevX);
 			rect[i].setY(prevY);
 			//System.out.print("yes");
