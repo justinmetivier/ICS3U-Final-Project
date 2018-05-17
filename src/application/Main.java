@@ -38,6 +38,9 @@ public class Main extends Application {
 	public static double prevY = 0;
 	public static File highscores;
 	public static int counter = 0;
+	public static int xTotal = 0, yTotal = 0;
+	public static int leftOrRight = 0, upOrDown = 0;
+	public static int velocity = 1;
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -47,9 +50,9 @@ public class Main extends Application {
 			highscores = new File("C:\\\\Users\\\\justi\\\\eclipse-workspace\\\\ICS3U-Final-Project");
 			// HomeScene = new Scene(grid,400,400);
 			rect = new Rectangle(40, 10, 10, 10);
-			rect2 = new Rectangle(30, 10, 10, 10);
-			rect3 = new Rectangle(20, 10, 10, 10);
-			rect4 = new Rectangle(10, 10, 10, 10);
+			rect2 = new Rectangle();
+			rect3 = new Rectangle();
+			rect4 = new Rectangle();
 
 			recList.add(rect);
 			recList.add(rect2);
@@ -67,22 +70,35 @@ public class Main extends Application {
 			new AnimationTimer() {
 				@Override
 				public void handle(long now) {
+					setTrailer();
 					
-					for (int i = 0; i < recList.size(); i++) {
-						PrevX.add(recList.get(i).getX());
-						PrevY.add(recList.get(i).getY());
+					
+					
+					if(rect.getX()>400) {
+						rect.setX(0);
 					}
-					for (int i = 0; i < recList.size() - 1; i++) {
-						recList.get(i + 1).setX(PrevX.get(i));
-						recList.get(i + 1).setY(PrevY.get(i));
+					if(rect.getX()<0) {
+						rect.setX(400);
 					}
-					for (int i = 0; i < recList.size() - 1; i++) {
-						PrevX.remove(i);
-						PrevY.remove(i);
+					if(rect.getY()>400) {
+						rect.setY(0);
 					}
-
-					rect.setX(rect.getX() + xVelocity);
-					rect.setY(rect.getY() + yVelocity);
+					if(rect.getY()<0) {
+						rect.setY(390);
+					}
+					
+					xTotal+=xVelocity;
+					yTotal+=yVelocity;
+					rect.setX(rect.getX()+xVelocity);
+					rect.setY(rect.getY()+yVelocity);
+					
+//					for(int i = 0; i<recList.size(); i++) {
+//						if(leftOrRight == 1) {
+//							if(recList.get(i).getX()!=xTotal) {
+//								recList.get(i).setX(recList.get(i).getX()+xVelocity);
+//							}
+//						}
+//					}
 					
 					
 				}
@@ -99,23 +115,31 @@ public class Main extends Application {
 
 			switch (event.getCode()) {
 			case UP:
-				yVelocity = -1;
+				yVelocity = -velocity;
 				xVelocity = 0;
+				upOrDown = 1;
+				leftOrRight = 0; 
 				break;
 
 			case DOWN:
-				yVelocity = 1;
+				yVelocity = velocity;
 				xVelocity = 0;
+				upOrDown = 2;
+				leftOrRight = 0; 
 				break;
 
 			case LEFT:
 				yVelocity = 0;
-				xVelocity = -1;
+				xVelocity = -velocity;
+				upOrDown = 0;
+				leftOrRight = 1; 
 				break;
 
 			case RIGHT:
 				yVelocity = 0;
-				xVelocity = 1;
+				xVelocity = velocity;
+				upOrDown = 0;
+				leftOrRight = 2; 
 				break;
 			case T:
 				counter++;
@@ -126,13 +150,24 @@ public class Main extends Application {
 	}
 
 	public static void setTrailer() {
-		
+		for (int i = 0; i < recList.size()-1; i++) {
+			PrevX.add(recList.get(i).getX());
+			PrevY.add(recList.get(i).getY());
+		}
+		for (int i = 0; i < recList.size() - 1; i++) {
+			recList.get(i + 1).setX(PrevX.get(i));
+			recList.get(i + 1).setY(PrevY.get(i));
+		}
+		for (int i = 0; i < recList.size() - 1; i++) {
+			PrevX.remove(i);
+			PrevY.remove(i);
+		}
 		
 	}
 
-	public static void addLength() {
+	public static void addLength(int x, int y) {
 
-		Rectangle body = new Rectangle();
+		Rectangle body = new Rectangle(x, y , 10, 10);
 		recList.add(body);
 		root.getChildren().add(body);
 	}
