@@ -117,7 +117,7 @@ public class Main extends Application {
 						}
 
 						double t = (double) (now - start / 1000000000);
-						if (t % 0.5 == 0) {
+						if (t % 1 == 0) {
 							for (int i = 0; i < recList.size() - 1; i++) {
 								PrevX.add(recList.get(i).getX());
 								PrevY.add(recList.get(i).getY());
