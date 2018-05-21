@@ -24,6 +24,7 @@ import javafx.scene.paint.Color;
 
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.control.TextField;
 
 
@@ -36,6 +37,7 @@ public class Main extends Application {
 	public static double prevX = 0;
 	public static double prevY = 0;
 		
+	
 	//general sizes
 	public static int blocksize = 10;
 	public static int appW = 70 *10, appH = 70*10;
@@ -45,7 +47,10 @@ public class Main extends Application {
 	//game scene
 	public static Scene nGameScene;
 	public static Pane root;
-	public static Button temp;
+	public static Label lscore, ltime;
+	public static int score;
+	public static long time;
+
 
 	
 	//game over scene
@@ -67,7 +72,7 @@ public class Main extends Application {
 	
 	
 	//high scores
-	public static int HighScore =0;
+	public static int nHighScore =0,sHighScore = 0;
 	public static File highscores;
 	
 	
@@ -105,8 +110,10 @@ public class Main extends Application {
 			nExpl = new Label();
 			nExpl.setTextFill(Color.WHITE);
 			homePane.add(nExpl,0,2);
-			nExpl.setText("The normal endless game mode no time limit just get \nas many points as possible");
+			nExpl.setText("The normal game mode has no time limit. \n\nTry to get as many points as possible without dying");
+			nExpl.setTextAlignment(TextAlignment.CENTER);
 			GridPane.setHalignment(nExpl, HPos.CENTER);
+			GridPane.setValignment(nExpl, VPos.TOP);
 			
 			//Speed Mode
 			speed = new Button();
@@ -116,8 +123,10 @@ public class Main extends Application {
 			sExpl = new Label();
 			sExpl.setTextFill(Color.WHITE);
 			homePane.add(sExpl,1,2);
-			sExpl.setText("Get as many points as possible in one minute");
+			sExpl.setText("The speed game mode has a 1 minute time limit. \n\nTry to get get as many points in a minute as \npossible without dying");
+			sExpl.setTextAlignment(TextAlignment.CENTER);
 			GridPane.setHalignment(sExpl, HPos.CENTER);
+			GridPane.setValignment(sExpl, VPos.TOP);
 			
 			
 			//Label
@@ -182,8 +191,7 @@ public class Main extends Application {
 			}
 			rect[0].setFill(Color.RED);
 			
-			temp = new Button();
-			root.getChildren().add(temp);
+			
 			
 			
 			
