@@ -36,7 +36,7 @@ import javafx.scene.control.TextField;
 public class Main extends Application {
 	//General Variables
 		public static final int blockSize = 30;
-		public static int numRows = 25, numColumns = numRows;
+		public static int numRows = 20, numColumns = numRows;
 		public static final int appH = numRows*blockSize;
 		public static final int appW = numRows*blockSize;
 		public static long start;
@@ -156,17 +156,18 @@ public class Main extends Application {
 						  rect.setFill(Color.RED);
 						  for(int i = 0; i < recList.size(); i++) {
 							  recList.get(i).setFill(Color.RED);
-							  this.stop();
-							  PauseTransition pause = new PauseTransition(Duration.seconds(3));
-							  pause.setOnFinished(e -> {
-							     primaryStage.setScene(overScene);
-							  });
-							  pause.play();
 						  }
-						}
+						  this.stop();
+						  PauseTransition pause = new PauseTransition(Duration.seconds(3));
+						  pause.setOnFinished(e -> {
+						     primaryStage.setScene(overScene);
+						  });
+						  pause.play();
+						  }
+						
 						
 						if(isEaten()) {
-				//			addLength();
+							addLength();
 							needFood=true;
 						}
 
@@ -180,33 +181,19 @@ public class Main extends Application {
 								PrevX.add(GridPane.getColumnIndex(recList.get(i)));
 								PrevY.add(GridPane.getRowIndex(recList.get(i)));
 							}
+							
+							
+							
+						}
 							for (int i = 0; i < recList.size() - 1; i++) {
 								GridPane.setColumnIndex(recList.get(i+1), PrevX.get(i));
 								GridPane.setRowIndex(recList.get(i+1), PrevY.get(i));
 							}
-							for (int i = 0; i < recList.size() - 1; i++) {
+							for (int i = 0; i < PrevX.size() - 1; i++) {
 								PrevX.remove(i);
 								PrevY.remove(i);
 							}
-						}
-						/*
-						if (rect.getX() > appW) {
-							rect.setX(0);
-						}
-						if (rect.getX() < 0) {
-							rect.setX(appW);
-						}
-						if (rect.getY() > appH) {
-							rect.setY(0);
-						}
-						if (rect.getY() < 0) {
-							rect.setY(appH);
-						}
-
-						xTotal += xVelocity;
-						yTotal += yVelocity;*/
-						
-						switch (direction){
+							switch (direction){
 							case UP:
 								GridPane.setRowIndex(rect, GridPane.getRowIndex(rect)-1);
 								pause();
@@ -223,7 +210,22 @@ public class Main extends Application {
 								GridPane.setColumnIndex(rect, GridPane.getColumnIndex(rect)-1);
 								pause();
 								break;
-							
+								/*
+								if (rect.getX() > appW) {
+									rect.setX(0);
+								}
+								if (rect.getX() < 0) {
+									rect.setX(appW);
+								}
+								if (rect.getY() > appH) {
+									rect.setY(0);
+								}
+								if (rect.getY() < 0) {
+									rect.setY(appH);
+								}
+
+								xTotal += xVelocity;
+								yTotal += yVelocity;*/
 						}
 						  
 
@@ -291,7 +293,8 @@ public class Main extends Application {
 	}
 	public static void addLength() {
 
-		Rectangle body = new Rectangle(10, 10);
+		Rectangle body = new Rectangle(blockSize, blockSize);
+		body.setFill(Color.WHITE);
 		recList.add(recList.size(), body);
 		root.getChildren().add(body);
 	}
@@ -305,25 +308,22 @@ public class Main extends Application {
 		
 	}
 	public boolean dead() {
-		if(temp) {
+		
+		for (int i = 1; i < PrevX.size(); i++) {
+			if(PrevX.get(i) == GridPane.getColumnIndex(rect) && PrevY.get(i) == GridPane.getRowIndex(rect)) {
+				annoying = true;
+			}
+			else
+				annoying = false;
+		}
+		if(annoying) {
 			return true;
 		}
 		else {
-			for (int i = 1; i < recList.size(); i++) {
-				if(PrevX.get(i) == rect.getX() && PrevY.get(i) == rect.getY()) {
-					annoying = true;
-				}
-				else
-					annoying = false;
-			}
-			if(annoying) {
-				return true;
-			}
-			else {
-				return false;
-			}
+			return false;
 		}
 	}
+	
 	
 	public static void GOsetup() {
 		//Game Over
@@ -394,17 +394,22 @@ public class Main extends Application {
 		//tempBtn = new Button();
 		//root.getChildren().add(tempBtn);
 
-//		rect2 = new Rectangle(3*blockSize, 0, blockSize, blockSize);
-//		recList.add(1, rect2);
-//
-//		rect3 = new Rectangle(2*blockSize, 0, blockSize, blockSize);
-//		recList.add(2, rect3);
-//
-//		rect4 = new Rectangle(blockSize, 0, blockSize, blockSize);
-//		recList.add(3, rect4);
-//
-//		rect5 = new Rectangle(0, 0, blockSize, blockSize);
-//		recList.add(4, rect5);
+		rect2 = new Rectangle(blockSize, blockSize);
+		rect2.setFill(Color.WHITE);
+		GridPane.setColumnIndex(rect2, 2);
+		GridPane.setRowIndex(rect2, 1);
+		
+		recList.add(1, rect2);
+
+		root.getChildren().addAll(recList);
+/*	rect3 = new Rectangle(2*blockSize, 0, blockSize, blockSize);
+		recList.add(2, rect3);
+
+		rect4 = new Rectangle(blockSize, 0, blockSize, blockSize);
+		recList.add(3, rect4);
+
+		rect5 = new Rectangle(0, 0, blockSize, blockSize);
+		recList.add(4, rect5);*/
 		
 		food = new Circle(blockSize/2);
 		
@@ -412,7 +417,7 @@ public class Main extends Application {
 		GridPane.setRowIndex(food, (numRows)/2);
 		GridPane.setColumnIndex(food, (numRows)/2);
 		root.getChildren().add(food);
-		root.getChildren().addAll(rect);
+		
 		
 		commence = false;
 		
