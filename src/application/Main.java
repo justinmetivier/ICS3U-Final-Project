@@ -66,6 +66,7 @@ public class Main extends Application {
 			// HomeScene = new Scene(grid,400,400);
 			rect = new Rectangle(4*CUBESIZE, 0, CUBESIZE, CUBESIZE);
 			recList.add(0, rect);
+			root.getChildren().addAll(rect);
 
 //			rect2 = new Rectangle(3*CUBESIZE, 0, CUBESIZE, CUBESIZE);
 //			recList.add(1, rect2);
@@ -86,7 +87,6 @@ public class Main extends Application {
 
 			commence = false;
 
-			root.getChildren().addAll(rect);
 			
 			needFood = true; 
 
@@ -94,7 +94,6 @@ public class Main extends Application {
 //			rect3.setFill(Color.GREEN);
 
 			bindPlayerControls();
-			// addLength();
 
 			start = System.nanoTime();
 			primaryStage.setScene(mainScene);
@@ -108,7 +107,7 @@ public class Main extends Application {
 					if (commence == true) {
 						
 						if(isEaten()) {
-//							addLength();
+							addLength();
 							needFood=true;
 						}
 
@@ -117,20 +116,16 @@ public class Main extends Application {
 						}
 
 						double t = (double) (now - start / 1000000000);
-						if (t % 1 == 0) {
+						if (t % 10 == 0) {
 							for (int i = 0; i < recList.size() - 1; i++) {
-								PrevX.add(recList.get(i).getX());
-								PrevY.add(recList.get(i).getY());
+								PrevX.add(i, recList.get(i).getX());
+								PrevY.add(i, recList.get(i).getY());
 							}
 							for (int i = 0; i < recList.size() - 1; i++) {
 								recList.get(i + 1).setX(PrevX.get(i));
 								recList.get(i + 1).setY(PrevY.get(i));
 							}
-							for (int i = 0; i < recList.size() - 1; i++) {
-								PrevX.remove(i);
-								PrevY.remove(i);
-							}
-						}
+						
 						if (rect.getX() > WIDTH) {
 							rect.setX(0);
 						}
@@ -149,6 +144,7 @@ public class Main extends Application {
 						rect.setX(rect.getX() + xVelocity);
 						rect.setY(rect.getY() + yVelocity);
 
+					}
 					}
 				}
 
@@ -218,7 +214,6 @@ public class Main extends Application {
 	}
 
 	public static void addLength() {
-
 		Rectangle body = new Rectangle(10, 10);
 		recList.add(recList.size(), body);
 		root.getChildren().add(body);
