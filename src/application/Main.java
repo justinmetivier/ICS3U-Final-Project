@@ -3,6 +3,7 @@ package application;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import javafx.animation.AnimationTimer;
 import javafx.animation.PauseTransition;
@@ -10,7 +11,7 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
-
+import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -25,7 +26,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
-
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
@@ -34,18 +35,20 @@ import javafx.scene.control.TextField;
 
 public class Main extends Application {
 	//General Variables
-		public static final int blockSize = 15;
-		public static final int appH = 50*blockSize;
-		public static final int appW = 50*blockSize;
+		public static final int blockSize = 30;
+		public static int numRows = 25, numColumns = numRows;
+		public static final int appH = numRows*blockSize;
+		public static final int appW = numRows*blockSize;
 		public static long start;
 
 
 		//normal game scene
 		public static Scene nGameScene;
-		public static Pane root;
+		public static GridPane root;
 		public static Label lscore, ltime;
 		public static int score;
 		public static long time;
+		
 
 
 		//game over scene
@@ -65,7 +68,7 @@ public class Main extends Application {
 		public static GridPane homePane;
 		public static Button normal,speed;
 		public static Label olabel,title,nExpl,sExpl; 
-		public static int numRows = 4, numColumns =2;
+		public static int menuRows = 4, menuColumns =2;
 		
 
 		//high scores
@@ -74,18 +77,22 @@ public class Main extends Application {
 
 
 	//Snake and movement
+		enum Direction{
+			UP, DOWN, RIGHT, LEFT
+		}
+		public static Direction direction;
 		public static ArrayList<Rectangle> recList = new ArrayList<Rectangle>();
-		public static ArrayList<Double> PrevX = new ArrayList<Double>();
-		public static ArrayList<Double> PrevY = new ArrayList<Double>();
+		public static ArrayList<Integer> PrevX = new ArrayList<Integer>();
+		public static ArrayList<Integer> PrevY = new ArrayList<Integer>();
 		public static Rectangle rect, rect2, rect3, rect4, rect5;
 		public static int xVelocity = 0, yVelocity = 0;
 		public static double prevX = 0, prevY = 0;
 		public static int xTotal = 0, yTotal = 0;
 		public static int leftOrRight = 0, upOrDown = 0;
 		public static int velocity = blockSize;
-
+		public static int step;
 		public static boolean commence, needFood;
-		public static Rectangle food; 
+		public static Circle food; 
 	
 	
 	
@@ -138,12 +145,12 @@ public class Main extends Application {
 
 					if (commence == true) {
 						
-						tempBtn.setOnAction(new EventHandler<ActionEvent>() {
+						/*tempBtn.setOnAction(new EventHandler<ActionEvent>() {
 				            @Override
 				            public void handle(ActionEvent event) {
 				            	temp=true;
 				            }
-				        });
+				        });*/
 						
 						if(dead()) {
 						  rect.setFill(Color.RED);
@@ -157,8 +164,9 @@ public class Main extends Application {
 							  pause.play();
 						  }
 						}
+						
 						if(isEaten()) {
-							addLength();
+				//			addLength();
 							needFood=true;
 						}
 
@@ -169,18 +177,19 @@ public class Main extends Application {
 						double t = (double) (now - start / 1000000000);
 						if (t % 0.5 == 0) {
 							for (int i = 0; i < recList.size() - 1; i++) {
-								PrevX.add(recList.get(i).getX());
-								PrevY.add(recList.get(i).getY());
+								PrevX.add(GridPane.getColumnIndex(recList.get(i)));
+								PrevY.add(GridPane.getRowIndex(recList.get(i)));
 							}
 							for (int i = 0; i < recList.size() - 1; i++) {
-								recList.get(i + 1).setX(PrevX.get(i));
-								recList.get(i + 1).setY(PrevY.get(i));
+								GridPane.setColumnIndex(recList.get(i+1), PrevX.get(i));
+								GridPane.setRowIndex(recList.get(i+1), PrevY.get(i));
 							}
 							for (int i = 0; i < recList.size() - 1; i++) {
 								PrevX.remove(i);
 								PrevY.remove(i);
 							}
 						}
+						/*
 						if (rect.getX() > appW) {
 							rect.setX(0);
 						}
@@ -195,9 +204,28 @@ public class Main extends Application {
 						}
 
 						xTotal += xVelocity;
-						yTotal += yVelocity;
-						rect.setX(rect.getX() + xVelocity);
-						rect.setY(rect.getY() + yVelocity);
+						yTotal += yVelocity;*/
+						
+						switch (direction){
+							case UP:
+								GridPane.setRowIndex(rect, GridPane.getRowIndex(rect)-1);
+								pause();
+								break;
+							case DOWN:
+								GridPane.setRowIndex(rect, GridPane.getRowIndex(rect)+1);
+								pause();
+								break;
+							case RIGHT:
+								GridPane.setColumnIndex(rect, GridPane.getColumnIndex(rect)+1);
+								pause();
+								break;
+							case LEFT:
+								GridPane.setColumnIndex(rect, GridPane.getColumnIndex(rect)-1);
+								pause();
+								break;
+							
+						}
+						  
 
 					}
 				}
@@ -216,39 +244,35 @@ public class Main extends Application {
 
 			switch (event.getCode()) {
 			case UP:
-				yVelocity = -velocity;
-				xVelocity = 0;
-				upOrDown = 1;
-				leftOrRight = 0;
+				if(direction != Direction.DOWN) {
+				direction = Direction.UP;
 				commence = true;
+				}
 				break;
 
 			case DOWN:
-				yVelocity = velocity;
-				xVelocity = 0;
-				upOrDown = 2;
-				leftOrRight = 0;
-				commence = true;
+				if(direction != Direction.UP) {
+					direction = Direction.DOWN;
+					commence = true;
+					}
 				break;
 
 			case LEFT:
-				yVelocity = 0;
-				xVelocity = -velocity;
-				upOrDown = 0;
-				leftOrRight = 1;
-				commence = true;
+				if(direction != Direction.RIGHT) {
+					direction = Direction.LEFT;
+					commence = true;
+					}
 				break;
 
 			case RIGHT:
-				yVelocity = 0;
-				xVelocity = velocity;
-				upOrDown = 0;
-				leftOrRight = 2;
-				commence = true;
+				if(direction != Direction.LEFT) {
+					direction = Direction.RIGHT;
+					commence = true;
+					}
 				break;
 			case P:
 				commence = false;
-				addLength();
+				//addLength();
 				break;
 			}
 
@@ -259,9 +283,8 @@ public class Main extends Application {
 		
 	}
 	public static void addFood() {
-		
-		food.setX(((int)(Math.random()*((appW/10)-10))*blockSize)*1.0);
-		food.setY(((int)(Math.random()*((appW/10)-10))*blockSize)*1.0);
+		GridPane.setRowIndex(food, (int)(Math.random()*numRows));
+		GridPane.setColumnIndex(food, (int)(Math.random()*numRows));
 		
 		needFood = false;
 
@@ -273,7 +296,9 @@ public class Main extends Application {
 		root.getChildren().add(body);
 	}
 	public boolean isEaten() {
-		if(rect.getX()==food.getX()&&rect.getY()==food.getY()) {
+		if(GridPane.getColumnIndex(rect)==GridPane.getColumnIndex(food)&&+
+				GridPane.getRowIndex(rect)==GridPane.getRowIndex(food)) {
+			
 			return true;
 		} else
 			return false;
@@ -304,12 +329,12 @@ public class Main extends Application {
 		//Game Over
 		overPane = new GridPane();
 		overScene = new Scene(overPane,appH,appW);
-		overPane.setStyle("-fx-background-color: #242424;");
-		for(int i =0; i<numColumns;i++) {
+		overPane.setStyle("-fx-background-color: #6B6B6B;");
+		for(int i =0; i<menuColumns;i++) {
 			ColumnConstraints column = new ColumnConstraints(appW/2);
             overPane.getColumnConstraints().add(column);
 		}
-		for(int i =0;i<numRows;i++) {
+		for(int i =0;i<menuRows;i++) {
 			RowConstraints row = new RowConstraints(appH/2);
 			overPane.getRowConstraints().add(row);
 		}
@@ -341,17 +366,33 @@ public class Main extends Application {
 	}
 	public static void NGMsetup() {
 		//normal Game Mode
-		root = new Pane();
-		root.setStyle("-fx-background-color: #242424;");
-		nGameScene = new Scene(root, appH, appW);
-		highscores = new File("C:\\\\Users\\\\justi\\\\eclipse-workspace\\\\ICS3U-Final-Project");
-		// HomeScene = new Scene(grid,400,400);
-		rect = new Rectangle(4*blockSize, 0, blockSize, blockSize);
-		rect.setFill(Color.WHITE);
-		recList.add(0, rect);
+		root = new GridPane();
 		
-		tempBtn = new Button();
-		root.getChildren().add(tempBtn);
+		nGameScene = new Scene(root, appH, appW);
+		for(int i =0; i<numColumns;i++) {
+			ColumnConstraints column = new ColumnConstraints(blockSize);
+            root.getColumnConstraints().add(column);
+		}
+		
+		for(int i =0;i<numRows;i++) {
+			RowConstraints row = new RowConstraints(blockSize);
+			root.getRowConstraints().add(row);
+		}
+		root.setStyle("-fx-background-color: #6B6B6B");
+		root.setGridLinesVisible(true);
+		
+		
+		highscores = new File("C:\\\\Users\\\\justi\\\\eclipse-workspace\\\\ICS3U-Final-Project");
+
+		
+		rect = new Rectangle(blockSize, blockSize);
+		rect.setFill(Color.WHITE);
+		GridPane.setColumnIndex(rect, 1);
+		GridPane.setRowIndex(rect, 1);
+		recList.add(rect);
+		
+		//tempBtn = new Button();
+		//root.getChildren().add(tempBtn);
 
 //		rect2 = new Rectangle(3*blockSize, 0, blockSize, blockSize);
 //		recList.add(1, rect2);
@@ -365,24 +406,30 @@ public class Main extends Application {
 //		rect5 = new Rectangle(0, 0, blockSize, blockSize);
 //		recList.add(4, rect5);
 		
-		food = new Rectangle(appW/2,appH/2, 10, 10 );
+		food = new Circle(blockSize/2);
+		
 		food.setFill(Color.BLUE);
+		GridPane.setRowIndex(food, (numRows)/2);
+		GridPane.setColumnIndex(food, (numRows)/2);
 		root.getChildren().add(food);
-		commence = false;
 		root.getChildren().addAll(rect);
+		
+		commence = false;
+		
+		
 		needFood = true; 
 	}
 	public static void MMsetup() {
 		//main Menu
 				homePane = new GridPane();
 				homeScene = new Scene(homePane,appH,appW);
-				homePane.setStyle("-fx-background-color: #242424;");
+				homePane.setStyle("-fx-background-color: #6B6B6B;");
 			
-				for(int i =0; i<numColumns;i++) {
+				for(int i =0; i<menuColumns;i++) {
 					ColumnConstraints column = new ColumnConstraints(appW/2);
 		            homePane.getColumnConstraints().add(column);
 				}
-				for(int i =0;i<numRows;i++) {
+				for(int i =0;i<menuRows;i++) {
 					RowConstraints row = new RowConstraints(appH/4);
 					homePane.getRowConstraints().add(row);
 				}
@@ -441,6 +488,17 @@ public class Main extends Application {
 				
 	}
 
+	public static void pause() {
+		try {
+			TimeUnit.MILLISECONDS.sleep(250);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
 	
 //	public static int getHighScore() {
 //		Scanner sc = new Scanner(highscores);
