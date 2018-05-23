@@ -2,7 +2,10 @@ package application;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
+
+import javax.swing.BorderFactory;
 
 import application.Main.Direction;
 import javafx.animation.AnimationTimer;
@@ -14,6 +17,7 @@ import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -33,10 +37,11 @@ import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
 public class Main extends Application {
-	
+	public static int numRowCol = 35;
 	public static final int CUBESIZE = 20;
-	public static final int HEIGHT = 35 * CUBESIZE;
-	public static final int WIDTH = 35 * CUBESIZE;
+	public static final int HEIGHT = numRowCol * CUBESIZE;
+	public static final int WIDTH = numRowCol * CUBESIZE;
+	
 	
 	//normal game scene
 	public static Scene mainScene;
@@ -71,6 +76,7 @@ public class Main extends Application {
 	public static ArrayList<Rectangle> recList = new ArrayList<Rectangle>();
 	public static ArrayList<Double> PrevX = new ArrayList<Double>();
 	public static ArrayList<Double> PrevY = new ArrayList<Double>();
+	public static Rectangle[][] background = new Rectangle [numRowCol][numRowCol];
 	public static Rectangle rect, rect2, rect3, rect4, rect5;
 	public static int xVelocity = 0, yVelocity = 0;
 	public static double prevX = 0, prevY = 0;
@@ -78,8 +84,12 @@ public class Main extends Application {
 	public static int leftOrRight = 0, upOrDown = 0;
 	public static int velocity = CUBESIZE;
 	public static int step;
-	public static boolean commence, needFood;
+	public static boolean commence, needFood, validLocal;
+	
+	//food
 	public static Rectangle food; 
+	public static int randx, randy;
+	public static Random rx = new Random(), ry = new Random();
 	
 
 	//high scores
@@ -111,7 +121,7 @@ public class Main extends Application {
 	        });
 			
 			
-			NGMsetup();
+			NormalGamesetup();
 
 			
 			GOsetup();
@@ -242,17 +252,34 @@ public class Main extends Application {
 	}
 	
 	public static void addFood() {
-		food.setX(((int)(Math.random()*((WIDTH/10)-10))*CUBESIZE)*1.0);
-		food.setY(((int)(Math.random()*((WIDTH/10)-10))*CUBESIZE)*1.0);
 		
+		do {
+			randx = Math.round((rx.nextInt(WIDTH-CUBESIZE))/CUBESIZE)*CUBESIZE;
+			randy = Math.round((ry.nextInt(HEIGHT-CUBESIZE))/CUBESIZE)*CUBESIZE;
+			for(int i = 0; i<recList.size(); i++) {
+				if(randx != recList.get(i).getX() && randy != recList.get(i).getY() ) {
+					validLocal = true;
+				}
+				else {
+					validLocal = false;
+				}
+			}
+		}while(validLocal);
+		food.setX(randx);
+		food.setY(randy);
+		food.setFill(Color.CORNFLOWERBLUE);
 		needFood = false;
-
+		
 	}
 
 	public static void addLength() {
-		Rectangle body = new Rectangle(10, 10);
+		Rectangle body = new Rectangle(CUBESIZE, CUBESIZE);
+		
+		body.setFill(Color.OLIVEDRAB);
 		recList.add(recList.size(), body);
 		root.getChildren().add(body);
+		
+		body.toBack();
 	}
 	
 	public boolean isEaten() {
@@ -265,13 +292,13 @@ public class Main extends Application {
 
 public boolean dead() {
 		
-		for (int i = 1; i < PrevX.size(); i++) {
+		/*for (int i = 1; i < PrevX.size(); i++) {
 			if(PrevX.get(i) == rect.getX() && PrevY.get(i) == rect.getY()) {
 				annoying = true;
 			}
 			else
 				annoying = false;
-		}
+		}*/
 		if(annoying) {
 			return true;
 		}
@@ -320,40 +347,59 @@ public boolean dead() {
         });
 	}
 	
-	public static void NGMsetup() {
+	public static void NormalGamesetup() {
 		//normal Game Mode
 		root = new Pane();
 		mainScene = new Scene(root, HEIGHT, WIDTH);
 		highscores = new File("C:\\\\Users\\\\justi\\\\eclipse-workspace\\\\ICS3U-Final-Project");
 		// HomeScene = new Scene(grid,400,400);
 		rect = new Rectangle(4*CUBESIZE, 0, CUBESIZE, CUBESIZE);
-		recList.add(0, rect);
-		root.getChildren().addAll(rect);
-
-//		rect2 = new Rectangle(3*CUBESIZE, 0, CUBESIZE, CUBESIZE);
-//		recList.add(1, rect2);
-//
-//		rect3 = new Rectangle(2*CUBESIZE, 0, CUBESIZE, CUBESIZE);
-//		recList.add(2, rect3);
-//
-//		rect4 = new Rectangle(CUBESIZE, 0, CUBESIZE, CUBESIZE);
-//		recList.add(3, rect4);
-//
-//		rect5 = new Rectangle(0, 0, CUBESIZE, CUBESIZE);
-//		recList.add(4, rect5);
+		rect.setFill(Color.DARKOLIVEGREEN);
 		
-		food = new Rectangle(WIDTH/2,HEIGHT/2, 10, 10 );
+		recList.add(0, rect);
+
+		
+
+		rect2 = new Rectangle(3*CUBESIZE, 0, CUBESIZE, CUBESIZE);
+		recList.add(1, rect2);
+
+		rect3 = new Rectangle(2*CUBESIZE, 0, CUBESIZE, CUBESIZE);
+		recList.add(2, rect3);
+
+		rect4 = new Rectangle(CUBESIZE, 0, CUBESIZE, CUBESIZE);
+		recList.add(3, rect4);
+
+		rect5 = new Rectangle(0, 0, CUBESIZE, CUBESIZE);
+		recList.add(4, rect5);
+		
+		food = new Rectangle(WIDTH/2,HEIGHT/2, CUBESIZE, CUBESIZE);
+		
+		food.setFill(Color.WHITE);
 		root.getChildren().add(food);
 
-		
+		for(int i = 1; i<recList.size(); i++) {
+			recList.get(i).setFill(Color.OLIVEDRAB);
+		}
+		root.getChildren().addAll(recList);
 
 		commence = false;
 
 		
 		needFood = true; 
+		
+		for(int i = 0;i< numRowCol; i++) {
+			for(int j = 0;j< numRowCol; j++) {
+				Rectangle back = new Rectangle(CUBESIZE,CUBESIZE);
+				back.setX(j*CUBESIZE);
+				back.setY(i*CUBESIZE);
+				back.setFill(Color.TRANSPARENT);
+			    back.setStroke(Color.BLACK);
+			    background[i][j] = back;
+			    root.getChildren().add(background[i][j]);
+			}
+		}
 
-//		rect2.setFill(Color.RED);
-//		rect3.setFill(Color.GREEN);
+		
 
 	}
 
