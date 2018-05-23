@@ -18,15 +18,13 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
 public class Main extends Application {
-	
+
 	public static final int HEIGHT = 400;
 	public static final int WIDTH = 400;
 	public static final int CUBESIZE = 10;
-//	public static final int HEIGHT = 400;
-//	public static final int HEIGHT = 400;
-//	public static final int HEIGHT = 400;
-
-	
+	// public static final int HEIGHT = 400;
+	// public static final int HEIGHT = 400;
+	// public static final int HEIGHT = 400;
 
 	public static Scene mainScene;
 	public static GridPane grid;
@@ -54,8 +52,8 @@ public class Main extends Application {
 	public static int velocity = CUBESIZE;
 	public static long start;
 	public static boolean commence;
-	public static Rectangle food; 
-	public static boolean needFood; 
+	public static Rectangle food;
+	public static boolean needFood;
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -64,38 +62,24 @@ public class Main extends Application {
 			mainScene = new Scene(root, HEIGHT, WIDTH);
 			highscores = new File("C:\\\\Users\\\\justi\\\\eclipse-workspace\\\\ICS3U-Final-Project");
 			// HomeScene = new Scene(grid,400,400);
-			rect = new Rectangle(4*CUBESIZE, 0, CUBESIZE, CUBESIZE);
+			rect = new Rectangle(4 * CUBESIZE, 0, CUBESIZE, CUBESIZE);
 			recList.add(0, rect);
 			root.getChildren().addAll(rect);
 
-//			rect2 = new Rectangle(3*CUBESIZE, 0, CUBESIZE, CUBESIZE);
-//			recList.add(1, rect2);
-//
-//			rect3 = new Rectangle(2*CUBESIZE, 0, CUBESIZE, CUBESIZE);
-//			recList.add(2, rect3);
-//
-//			rect4 = new Rectangle(CUBESIZE, 0, CUBESIZE, CUBESIZE);
-//			recList.add(3, rect4);
-//
-//			rect5 = new Rectangle(0, 0, CUBESIZE, CUBESIZE);
-//			recList.add(4, rect5);
-			
-			food = new Rectangle(WIDTH/2,HEIGHT/2, 10, 10 );
-			root.getChildren().add(food);
 
-			
+			food = new Rectangle(WIDTH / 2, HEIGHT / 2, 10, 10);
+			root.getChildren().add(food);
 
 			commence = false;
 
-			
-			needFood = true; 
+			needFood = true;
 
-//			rect2.setFill(Color.RED);
-//			rect3.setFill(Color.GREEN);
+
 
 			bindPlayerControls();
 
 			start = System.nanoTime();
+			if(gameOver==false)
 			primaryStage.setScene(mainScene);
 
 			primaryStage.show();
@@ -106,45 +90,24 @@ public class Main extends Application {
 
 					if (commence == true) {
 						
-						if(isEaten()) {
-							addLength();
-							needFood=true;
+						if(killedYourself()) {
+							gameOver=true;
 						}
 
-						if(needFood == true) {
+						if (isEaten()) {
+							addLength();
+							needFood = true;
+						}
+
+						if (needFood == true) {
 							addFood();
 						}
+						
 
 						double t = (double) (now - start / 1000000000);
 						if (t % 10 == 0) {
-							for (int i = 0; i < recList.size() - 1; i++) {
-								PrevX.add(i, recList.get(i).getX());
-								PrevY.add(i, recList.get(i).getY());
-							}
-							for (int i = 0; i < recList.size() - 1; i++) {
-								recList.get(i + 1).setX(PrevX.get(i));
-								recList.get(i + 1).setY(PrevY.get(i));
-							}
-						
-						if (rect.getX() > WIDTH) {
-							rect.setX(0);
+							move();
 						}
-						if (rect.getX() < 0) {
-							rect.setX(WIDTH);
-						}
-						if (rect.getY() > HEIGHT) {
-							rect.setY(0);
-						}
-						if (rect.getY() < 0) {
-							rect.setY(HEIGHT);
-						}
-
-						xTotal += xVelocity;
-						yTotal += yVelocity;
-						rect.setX(rect.getX() + xVelocity);
-						rect.setY(rect.getY() + yVelocity);
-
-					}
 					}
 				}
 
@@ -202,14 +165,43 @@ public class Main extends Application {
 	}
 
 	public static void setTrailer() {
-		
+
 	}
-	
+
 	public static void addFood() {
-		food.setX(((int)(Math.random()*((WIDTH/10)-10))*CUBESIZE)*1.0);
-		food.setY(((int)(Math.random()*((WIDTH/10)-10))*CUBESIZE)*1.0);
-		
+		food.setX(((int) (Math.random() * ((WIDTH / 10) - 10)) * CUBESIZE) * 1.0);
+		food.setY(((int) (Math.random() * ((WIDTH / 10) - 10)) * CUBESIZE) * 1.0);
+
 		needFood = false;
+
+	}
+	public void move() {
+		for (int i = 0; i < recList.size() - 1; i++) {
+			PrevX.add(i, recList.get(i).getX());
+			PrevY.add(i, recList.get(i).getY());
+		}
+		for (int i = 0; i < recList.size() - 1; i++) {
+			recList.get(i + 1).setX(PrevX.get(i));
+			recList.get(i + 1).setY(PrevY.get(i));
+		}
+	
+	if (rect.getX() > WIDTH) {
+		rect.setX(0);
+	}
+	if (rect.getX() < 0) {
+		rect.setX(WIDTH-CUBESIZE);
+	}
+	if (rect.getY() > HEIGHT) {
+		rect.setY(0);
+	}
+	if (rect.getY() < 0) {
+		rect.setY(HEIGHT-CUBESIZE);
+	}
+
+	xTotal += xVelocity;
+	yTotal += yVelocity;
+	rect.setX(rect.getX() + xVelocity);
+	rect.setY(rect.getY() + yVelocity);
 
 	}
 
@@ -218,15 +210,30 @@ public class Main extends Application {
 		recList.add(recList.size(), body);
 		root.getChildren().add(body);
 	}
-	
-	public boolean isEaten() {
-		if(rect.getX()==food.getX()&&rect.getY()==food.getY()) {
+
+	public static boolean isEaten() {
+		if (rect.getX() == food.getX() && rect.getY() == food.getY()) {
 			return true;
 		} else
 			return false;
-		
-	}
 
+	}
+	
+	public static boolean killedYourself() {
+		boolean yes = false;
+		
+		for(int i=0; i<recList.size(); i++) {
+			
+		
+		if (rect.getX()==recList.get(i).getX()&&rect.getY()==recList.get(i).getY()&&i>1) {
+			yes = true;
+		} else {
+			yes = false;
+		}
+		}
+		return yes;
+	}
+	
 
 	public static void main(String[] args) {
 		launch(args);
