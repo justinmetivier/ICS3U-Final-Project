@@ -58,8 +58,8 @@ public class Main extends Application {
 		public static Label overt;
 		public static TextField namein;
 		public static String name;
-		public static Button submit, tempBtn;
-		public static boolean annoying = false, temp;
+		public static Button submit;
+		public static boolean annoying = false;
 		
 
 
@@ -145,12 +145,7 @@ public class Main extends Application {
 
 					if (commence == true) {
 						
-						/*tempBtn.setOnAction(new EventHandler<ActionEvent>() {
-				            @Override
-				            public void handle(ActionEvent event) {
-				            	temp=true;
-				            }
-				        });*/
+						
 						
 						if(dead()) {
 						  rect.setFill(Color.RED);
@@ -210,24 +205,24 @@ public class Main extends Application {
 								GridPane.setColumnIndex(rect, GridPane.getColumnIndex(rect)-1);
 								pause();
 								break;
-								/*
-								if (rect.getX() > appW) {
-									rect.setX(0);
-								}
-								if (rect.getX() < 0) {
-									rect.setX(appW);
-								}
-								if (rect.getY() > appH) {
-									rect.setY(0);
-								}
-								if (rect.getY() < 0) {
-									rect.setY(appH);
-								}
-
-								xTotal += xVelocity;
-								yTotal += yVelocity;*/
+								
 						}
-						  
+							/*
+							if (GridPane.getColumnIndex(rect) > numColumns) {
+								GridPane.setColumnIndex(rect, 0);
+							}
+							if (GridPane.getColumnIndex(rect) == 0) {
+								GridPane.setColumnIndex(rect, numColumns-1);
+							}
+							if (GridPane.getRowIndex(rect) > numRows) {
+								GridPane.setRowIndex(rect, 0);
+							}
+							if (GridPane.getRowIndex(rect) == 0) {
+								GridPane.setRowIndex(rect, numRows-1);
+							}*/
+
+							//xTotal += xVelocity;
+							//yTotal += yVelocity;
 
 					}
 				}
@@ -391,8 +386,8 @@ public class Main extends Application {
 		GridPane.setRowIndex(rect, 1);
 		recList.add(rect);
 		
-		//tempBtn = new Button();
-		//root.getChildren().add(tempBtn);
+		
+	
 
 		rect2 = new Rectangle(blockSize, blockSize);
 		rect2.setFill(Color.WHITE);
