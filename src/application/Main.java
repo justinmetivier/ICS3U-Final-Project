@@ -37,14 +37,8 @@ public class Main extends Application {
 	public static ArrayList<Double> PrevX = new ArrayList<Double>();
 	public static ArrayList<Double> PrevY = new ArrayList<Double>();
 	public static Rectangle rect;
-	public static Rectangle rect2;
-	public static Rectangle rect3;
-	public static Rectangle rect4;
-	public static Rectangle rect5;
 	public static int xVelocity = 0;
 	public static int yVelocity = 0;
-	public static double prevX = 0;
-	public static double prevY = 0;
 	public static File highscores;
 	public static int counter = 0;
 	public static int xTotal = 0, yTotal = 0;
