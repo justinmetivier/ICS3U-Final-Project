@@ -1,23 +1,23 @@
 package application;
-	
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
+import application.Main.Direction;
 import javafx.animation.AnimationTimer;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
-import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -27,79 +27,70 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
-import javafx.scene.control.TextField;
-
 
 public class Main extends Application {
-	//General Variables
-		public static final int blockSize = 30;
-		public static int numRows = 20, numColumns = numRows;
-		public static final int appH = numRows*blockSize;
-		public static final int appW = numRows*blockSize;
-		public static long start;
-
-
-		//normal game scene
-		public static Scene nGameScene;
-		public static GridPane root;
-		public static Label lscore, ltime;
-		public static int score;
-		public static long time;
-		
-
-
-		//game over scene
-		public static Scene overScene;
-		public static GridPane overPane;
-		public static boolean gameOver = false;
-		public static Label overt;
-		public static TextField namein;
-		public static String name;
-		public static Button submit;
-		public static boolean annoying = false;
-		
-
-
-		//main menu scene
-		public static Scene homeScene;
-		public static GridPane homePane;
-		public static Button normal,speed;
-		public static Label olabel,title,nExpl,sExpl; 
-		public static int menuRows = 4, menuColumns =2;
-		
-
-		//high scores
-		public static int nHighScore =0,sHighScore = 0;
-		public static File highscores;
-
+	
+	public static final int CUBESIZE = 20;
+	public static final int HEIGHT = 35 * CUBESIZE;
+	public static final int WIDTH = 35 * CUBESIZE;
+	
+	//normal game scene
+	public static Scene mainScene;
+	public static Pane root;
+	public static Label lscore, ltime;
+	public static int score;
+	public static long time;
+	public static long start;
+	
+	//main menu scene
+	public static Scene homeScene;
+	public static GridPane homePane;
+	public static Button normal,speed;
+	public static Label olabel,title,nExpl,sExpl; 
+	public static int menuRows = 4, menuColumns =2;
+	
+	//game over scene
+	public static Scene overScene;
+	public static GridPane overPane;
+	public static boolean gameOver = false;
+	public static Label overt;
+	public static TextField namein;
+	public static String name;
+	public static Button submit;
+	public static boolean annoying = false;
 
 	//Snake and movement
-		enum Direction{
-			UP, DOWN, RIGHT, LEFT
-		}
-		public static Direction direction;
-		public static ArrayList<Rectangle> recList = new ArrayList<Rectangle>();
-		public static ArrayList<Integer> PrevX = new ArrayList<Integer>();
-		public static ArrayList<Integer> PrevY = new ArrayList<Integer>();
-		public static Rectangle rect, rect2, rect3, rect4, rect5;
-		public static int xVelocity = 0, yVelocity = 0;
-		public static double prevX = 0, prevY = 0;
-		public static int xTotal = 0, yTotal = 0;
-		public static int leftOrRight = 0, upOrDown = 0;
-		public static int velocity = blockSize;
-		public static int step;
-		public static boolean commence, needFood;
-		public static Circle food; 
+	enum Direction{
+		UP, DOWN, RIGHT, LEFT
+	}
+	public static Direction direction;
+	public static ArrayList<Rectangle> recList = new ArrayList<Rectangle>();
+	public static ArrayList<Double> PrevX = new ArrayList<Double>();
+	public static ArrayList<Double> PrevY = new ArrayList<Double>();
+	public static Rectangle rect, rect2, rect3, rect4, rect5;
+	public static int xVelocity = 0, yVelocity = 0;
+	public static double prevX = 0, prevY = 0;
+	public static int xTotal = 0, yTotal = 0;
+	public static int leftOrRight = 0, upOrDown = 0;
+	public static int velocity = CUBESIZE;
+	public static int step;
+	public static boolean commence, needFood;
+	public static Rectangle food; 
 	
+
+	//high scores
+	public static int nHighScore =0,sHighScore = 0;
+	public static File highscores;
 	
-	
-	
+
 	@Override
 	public void start(Stage primaryStage) {
 		try {
+			
 			primaryStage.setResizable(false);
 			
 			MMsetup();
@@ -107,7 +98,7 @@ public class Main extends Application {
 			normal.setOnAction(new EventHandler<ActionEvent>() {
 	            @Override
 	            public void handle(ActionEvent event) {
-	            	primaryStage.setScene(nGameScene); 
+	            	primaryStage.setScene(mainScene); 
 	            	}
 	        });
 			
@@ -120,23 +111,16 @@ public class Main extends Application {
 	        });
 			
 			
-			
 			NGMsetup();
 
 			
 			GOsetup();
 			
-
 			bindPlayerControls();
-			// addLength();
 
 			start = System.nanoTime();
-			if(gameOver) {
-				primaryStage.setScene(overScene);
-			}
-			else {
-				primaryStage.setScene(homeScene);
-			}
+			primaryStage.setScene(homeScene);
+
 			primaryStage.show();
 
 			new AnimationTimer() {
@@ -145,21 +129,18 @@ public class Main extends Application {
 
 					if (commence == true) {
 						
-						
-						
 						if(dead()) {
-						  rect.setFill(Color.RED);
-						  for(int i = 0; i < recList.size(); i++) {
-							  recList.get(i).setFill(Color.RED);
-						  }
-						  this.stop();
-						  PauseTransition pause = new PauseTransition(Duration.seconds(3));
-						  pause.setOnFinished(e -> {
-						     primaryStage.setScene(overScene);
-						  });
-						  pause.play();
-						  }
-						
+							  rect.setFill(Color.RED);
+							  for(int i = 0; i < recList.size(); i++) {
+								  recList.get(i).setFill(Color.RED);
+							  }
+							  this.stop();
+							  PauseTransition pause = new PauseTransition(Duration.seconds(3));
+							  pause.setOnFinished(e -> {
+							     primaryStage.setScene(overScene);
+							  });
+							  pause.play();
+							  }
 						
 						if(isEaten()) {
 							addLength();
@@ -171,101 +152,80 @@ public class Main extends Application {
 						}
 
 						double t = (double) (now - start / 1000000000);
-						if (t % 0.5 == 0) {
+						if (t % 10 == 0) {
 							for (int i = 0; i < recList.size() - 1; i++) {
-								PrevX.add(GridPane.getColumnIndex(recList.get(i)));
-								PrevY.add(GridPane.getRowIndex(recList.get(i)));
+								PrevX.add(i, recList.get(i).getX());
+								PrevY.add(i, recList.get(i).getY());
 							}
-							
-							
-							
-						}
 							for (int i = 0; i < recList.size() - 1; i++) {
-								GridPane.setColumnIndex(recList.get(i+1), PrevX.get(i));
-								GridPane.setRowIndex(recList.get(i+1), PrevY.get(i));
+								recList.get(i + 1).setX(PrevX.get(i));
+								recList.get(i + 1).setY(PrevY.get(i));
 							}
-							for (int i = 0; i < PrevX.size() - 1; i++) {
-								PrevX.remove(i);
-								PrevY.remove(i);
-							}
-							switch (direction){
-							case UP:
-								GridPane.setRowIndex(rect, GridPane.getRowIndex(rect)-1);
-								pause();
-								break;
-							case DOWN:
-								GridPane.setRowIndex(rect, GridPane.getRowIndex(rect)+1);
-								pause();
-								break;
-							case RIGHT:
-								GridPane.setColumnIndex(rect, GridPane.getColumnIndex(rect)+1);
-								pause();
-								break;
-							case LEFT:
-								GridPane.setColumnIndex(rect, GridPane.getColumnIndex(rect)-1);
-								pause();
-								break;
-								
+						
+						if (rect.getX() > WIDTH) {
+							rect.setX(0);
 						}
-							/*
-							if (GridPane.getColumnIndex(rect) > numColumns) {
-								GridPane.setColumnIndex(rect, 0);
-							}
-							if (GridPane.getColumnIndex(rect) == 0) {
-								GridPane.setColumnIndex(rect, numColumns-1);
-							}
-							if (GridPane.getRowIndex(rect) > numRows) {
-								GridPane.setRowIndex(rect, 0);
-							}
-							if (GridPane.getRowIndex(rect) == 0) {
-								GridPane.setRowIndex(rect, numRows-1);
-							}*/
+						if (rect.getX() < 0) {
+							rect.setX(WIDTH);
+						}
+						if (rect.getY() > HEIGHT) {
+							rect.setY(0);
+						}
+						if (rect.getY() < 0) {
+							rect.setY(HEIGHT);
+						}
 
-							//xTotal += xVelocity;
-							//yTotal += yVelocity;
+						xTotal += xVelocity;
+						yTotal += yVelocity;
+						rect.setX(rect.getX() + xVelocity);
+						rect.setY(rect.getY() + yVelocity);
 
+					}
 					}
 				}
 
 			}.start();
-			
-			primaryStage.show();
-		} catch(Exception e) {
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void bindPlayerControls() {
-		nGameScene.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+		mainScene.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
 			// setTrailer();
 
 			switch (event.getCode()) {
 			case UP:
-				if(direction != Direction.DOWN) {
-				direction = Direction.UP;
+				yVelocity = -velocity;
+				xVelocity = 0;
+				upOrDown = 1;
+				leftOrRight = 0;
 				commence = true;
-				}
 				break;
 
 			case DOWN:
-				if(direction != Direction.UP) {
-					direction = Direction.DOWN;
-					commence = true;
-					}
+				yVelocity = velocity;
+				xVelocity = 0;
+				upOrDown = 2;
+				leftOrRight = 0;
+				commence = true;
 				break;
 
 			case LEFT:
-				if(direction != Direction.RIGHT) {
-					direction = Direction.LEFT;
-					commence = true;
-					}
+				yVelocity = 0;
+				xVelocity = -velocity;
+				upOrDown = 0;
+				leftOrRight = 1;
+				commence = true;
 				break;
 
 			case RIGHT:
-				if(direction != Direction.LEFT) {
-					direction = Direction.RIGHT;
-					commence = true;
-					}
+				yVelocity = 0;
+				xVelocity = velocity;
+				upOrDown = 0;
+				leftOrRight = 2;
+				commence = true;
 				break;
 			case P:
 				commence = false;
@@ -276,36 +236,37 @@ public class Main extends Application {
 		});
 
 	}
+
 	public static void setTrailer() {
 		
 	}
+	
 	public static void addFood() {
-		GridPane.setRowIndex(food, (int)(Math.random()*numRows));
-		GridPane.setColumnIndex(food, (int)(Math.random()*numRows));
+		food.setX(((int)(Math.random()*((WIDTH/10)-10))*CUBESIZE)*1.0);
+		food.setY(((int)(Math.random()*((WIDTH/10)-10))*CUBESIZE)*1.0);
 		
 		needFood = false;
 
 	}
-	public static void addLength() {
 
-		Rectangle body = new Rectangle(blockSize, blockSize);
-		body.setFill(Color.WHITE);
+	public static void addLength() {
+		Rectangle body = new Rectangle(10, 10);
 		recList.add(recList.size(), body);
 		root.getChildren().add(body);
 	}
+	
 	public boolean isEaten() {
-		if(GridPane.getColumnIndex(rect)==GridPane.getColumnIndex(food)&&+
-				GridPane.getRowIndex(rect)==GridPane.getRowIndex(food)) {
-			
+		if(rect.getX()==food.getX()&&rect.getY()==food.getY()) {
 			return true;
 		} else
 			return false;
 		
 	}
-	public boolean dead() {
+
+public boolean dead() {
 		
 		for (int i = 1; i < PrevX.size(); i++) {
-			if(PrevX.get(i) == GridPane.getColumnIndex(rect) && PrevY.get(i) == GridPane.getRowIndex(rect)) {
+			if(PrevX.get(i) == rect.getX() && PrevY.get(i) == rect.getY()) {
 				annoying = true;
 			}
 			else
@@ -319,18 +280,17 @@ public class Main extends Application {
 		}
 	}
 	
-	
 	public static void GOsetup() {
 		//Game Over
 		overPane = new GridPane();
-		overScene = new Scene(overPane,appH,appW);
+		overScene = new Scene(overPane,HEIGHT,WIDTH);
 		overPane.setStyle("-fx-background-color: #6B6B6B;");
-		for(int i =0; i<menuColumns;i++) {
-			ColumnConstraints column = new ColumnConstraints(appW/2);
+		for(int i =0; i< menuColumns;i++) {
+			ColumnConstraints column = new ColumnConstraints(WIDTH/2);
             overPane.getColumnConstraints().add(column);
 		}
 		for(int i =0;i<menuRows;i++) {
-			RowConstraints row = new RowConstraints(appH/2);
+			RowConstraints row = new RowConstraints(HEIGHT/2);
 			overPane.getRowConstraints().add(row);
 		}
 		//Over Title
@@ -359,78 +319,56 @@ public class Main extends Application {
             }
         });
 	}
+	
 	public static void NGMsetup() {
 		//normal Game Mode
-		root = new GridPane();
-		
-		nGameScene = new Scene(root, appH, appW);
-		for(int i =0; i<numColumns;i++) {
-			ColumnConstraints column = new ColumnConstraints(blockSize);
-            root.getColumnConstraints().add(column);
-		}
-		
-		for(int i =0;i<numRows;i++) {
-			RowConstraints row = new RowConstraints(blockSize);
-			root.getRowConstraints().add(row);
-		}
-		root.setStyle("-fx-background-color: #6B6B6B");
-		root.setGridLinesVisible(true);
-		
-		
+		root = new Pane();
+		mainScene = new Scene(root, HEIGHT, WIDTH);
 		highscores = new File("C:\\\\Users\\\\justi\\\\eclipse-workspace\\\\ICS3U-Final-Project");
+		// HomeScene = new Scene(grid,400,400);
+		rect = new Rectangle(4*CUBESIZE, 0, CUBESIZE, CUBESIZE);
+		recList.add(0, rect);
+		root.getChildren().addAll(rect);
 
+//		rect2 = new Rectangle(3*CUBESIZE, 0, CUBESIZE, CUBESIZE);
+//		recList.add(1, rect2);
+//
+//		rect3 = new Rectangle(2*CUBESIZE, 0, CUBESIZE, CUBESIZE);
+//		recList.add(2, rect3);
+//
+//		rect4 = new Rectangle(CUBESIZE, 0, CUBESIZE, CUBESIZE);
+//		recList.add(3, rect4);
+//
+//		rect5 = new Rectangle(0, 0, CUBESIZE, CUBESIZE);
+//		recList.add(4, rect5);
 		
-		rect = new Rectangle(blockSize, blockSize);
-		rect.setFill(Color.WHITE);
-		GridPane.setColumnIndex(rect, 1);
-		GridPane.setRowIndex(rect, 1);
-		recList.add(rect);
-		
-		
-	
-
-		rect2 = new Rectangle(blockSize, blockSize);
-		rect2.setFill(Color.WHITE);
-		GridPane.setColumnIndex(rect2, 2);
-		GridPane.setRowIndex(rect2, 1);
-		
-		recList.add(1, rect2);
-
-		root.getChildren().addAll(recList);
-/*	rect3 = new Rectangle(2*blockSize, 0, blockSize, blockSize);
-		recList.add(2, rect3);
-
-		rect4 = new Rectangle(blockSize, 0, blockSize, blockSize);
-		recList.add(3, rect4);
-
-		rect5 = new Rectangle(0, 0, blockSize, blockSize);
-		recList.add(4, rect5);*/
-		
-		food = new Circle(blockSize/2);
-		
-		food.setFill(Color.BLUE);
-		GridPane.setRowIndex(food, (numRows)/2);
-		GridPane.setColumnIndex(food, (numRows)/2);
+		food = new Rectangle(WIDTH/2,HEIGHT/2, 10, 10 );
 		root.getChildren().add(food);
+
 		
-		
+
 		commence = false;
-		
+
 		
 		needFood = true; 
+
+//		rect2.setFill(Color.RED);
+//		rect3.setFill(Color.GREEN);
+
 	}
+
 	public static void MMsetup() {
 		//main Menu
 				homePane = new GridPane();
-				homeScene = new Scene(homePane,appH,appW);
+				homeScene = new Scene(homePane,HEIGHT,WIDTH);
 				homePane.setStyle("-fx-background-color: #6B6B6B;");
 			
 				for(int i =0; i<menuColumns;i++) {
-					ColumnConstraints column = new ColumnConstraints(appW/2);
+					ColumnConstraints column = new ColumnConstraints(WIDTH/2);
 		            homePane.getColumnConstraints().add(column);
 				}
 				for(int i =0;i<menuRows;i++) {
-					RowConstraints row = new RowConstraints(appH/4);
+					RowConstraints row = new RowConstraints(HEIGHT/4);
 					homePane.getRowConstraints().add(row);
 				}
 				
@@ -487,32 +425,6 @@ public class Main extends Application {
 				
 				
 	}
-
-	public static void pause() {
-		try {
-			TimeUnit.MILLISECONDS.sleep(250);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	
-	
-	
-//	public static int getHighScore() {
-//		Scanner sc = new Scanner(highscores);
-//		int scoreA = 0;
-//		int scoreB = 0;
-//		int highScore = 0;
-//		while(sc.hasNext()) {
-//			scoreA = sc.nextInt();
-//			highScore = Math.max(scoreA, scoreB);
-//			scoreB = scoreA;
-//		}
-//		
-//		return highScore;
-//	}
 	
 	public static void main(String[] args) {
 		launch(args);
