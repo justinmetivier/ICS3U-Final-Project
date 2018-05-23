@@ -39,6 +39,7 @@ public class Main extends Application {
 	public static Rectangle rect;
 	public static int xVelocity = 0;
 	public static int yVelocity = 0;
+
 	public static File highscores;
 	public static int counter = 0;
 	public static int xTotal = 0, yTotal = 0;
@@ -48,6 +49,9 @@ public class Main extends Application {
 	public static boolean commence;
 	public static Rectangle food;
 	public static boolean needFood;
+	public static boolean h, v;
+
+	
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -67,6 +71,9 @@ public class Main extends Application {
 			commence = false;
 
 			needFood = true;
+			
+			h = false;
+			v = false;
 
 
 
@@ -86,6 +93,7 @@ public class Main extends Application {
 						
 						if(killedYourself()) {
 							gameOver=true;
+							System.out.print("GameOver");
 						}
 
 						if (isEaten()) {
@@ -99,9 +107,9 @@ public class Main extends Application {
 						
 
 						double t = (double) (now - start / 1000000000);
-						if (t % 10 == 0) {
+//						if (t % 2 == 0) 
 							move();
-						}
+						
 					}
 				}
 
@@ -118,35 +126,47 @@ public class Main extends Application {
 
 			switch (event.getCode()) {
 			case UP:
+				if(v==false) {
 				yVelocity = -velocity;
 				xVelocity = 0;
 				upOrDown = 1;
-				leftOrRight = 0;
 				commence = true;
+				h = false;
+				v = true;
+				}
 				break;
 
 			case DOWN:
+				if(v==false) {
 				yVelocity = velocity;
 				xVelocity = 0;
 				upOrDown = 2;
-				leftOrRight = 0;
 				commence = true;
+				h = false;
+				v = true;
+				}
 				break;
 
 			case LEFT:
+				if(h==false) {
 				yVelocity = 0;
 				xVelocity = -velocity;
 				upOrDown = 0;
-				leftOrRight = 1;
 				commence = true;
+				h = true;
+				v = false;
+				}
 				break;
 
 			case RIGHT:
+				if(h==false) {
 				yVelocity = 0;
 				xVelocity = velocity;
 				upOrDown = 0;
-				leftOrRight = 2;
 				commence = true;
+				h = true;
+				v = false;
+				}
 				break;
 			case P:
 				commence = false;
