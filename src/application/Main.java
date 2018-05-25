@@ -1,6 +1,9 @@
 package application;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
@@ -85,12 +88,11 @@ public class Main extends Application {
  	public static boolean commence, needFood, validLocal;
  	public static boolean h, v;
 	public static Text scoreBox;
-	
-
-	public static File highscores;
-	public static int counter = 0;
+	public static int counter;
 	public static int randx, randy;
 	public static Random rx = new Random(), ry = new Random();
+	public static boolean dead;
+	public static FileReader fr;
 	
 
 
@@ -102,6 +104,7 @@ public class Main extends Application {
 			normalGameModeSetup();
 			
 			gameOverSetup();
+			
 			
 			primaryStage.setScene(homeScene);
 			
@@ -130,23 +133,24 @@ public class Main extends Application {
 			new AnimationTimer() {
 				@Override
 				public void handle(long now) {
-
+					gameLive();
+					
 					if (commence == true) {
 						if(gameOver) {
 							 rect.setFill(Color.RED);
+							 food.setFill(Color.RED);
 							  for(int i = 0; i < recList.size(); i++) {
 								  recList.get(i).setFill(Color.RED);
 							  }
 							  this.stop();
-							  PauseTransition pause = new PauseTransition(Duration.seconds(3));
+							  PauseTransition pause = new PauseTransition(Duration.seconds(1));
 							  pause.setOnFinished(e -> {
 							     primaryStage.setScene(overScene);
 							  });
 							  pause.play();
 						}
-						gameLive();
 						double t = (double) (now - start / 1000000000);
-						if (t % 5 == 0)
+						if (t %3 == 0)
 							move();
 
 					}
@@ -196,6 +200,7 @@ public class Main extends Application {
 					v = false;
 				}
 				break;
+			
 
 			case RIGHT:
 				if (h == false) {
@@ -208,8 +213,7 @@ public class Main extends Application {
 				}
 				break;
 			case P:
-				commence = false;
-				addLength();
+				gameOver=true;
 				break;
 			
 			}
@@ -224,7 +228,7 @@ public class Main extends Application {
 		if (killedYourself()) {
 			
 			gameOver = true;
-			//System.out.println("GameOver");
+			System.out.println("GameOver");
 		}
 
 		if (isEaten()) {
@@ -240,7 +244,6 @@ public class Main extends Application {
 
 	}
 
-	
 	public static void addFood() {
 		//do {
 			randx = rx.nextInt((WIDTH-CUBESIZE)-CUBESIZE)+CUBESIZE;
@@ -271,15 +274,20 @@ public class Main extends Application {
 
 		if (rect.getX() > WIDTH) {
 			rect.setX(0);
+//			gameOver=true;
 		}
 		if (rect.getX() < 0) {
 			rect.setX(WIDTH - CUBESIZE);
+//			gameOver=true;
 		}
-		if (rect.getY() > HEIGHT) {
+		if (rect.getY() > HEIGHT)
+		{
 			rect.setY(0);
+//			gameOver=true;
 		}
 		if (rect.getY() < 0) {
 			rect.setY(HEIGHT - CUBESIZE);
+//			gameOver=true;
 		}
 
 		xTotal += xVelocity;
@@ -296,6 +304,7 @@ public class Main extends Application {
 		 		recList.add(recList.size(), body);
 		 		root.getChildren().add(body);
 				body.toBack();
+				counter++;
 	}
 
 	public static boolean isEaten() {
@@ -357,21 +366,20 @@ public class Main extends Application {
 	}
 
 	public static boolean killedYourself() {
-		boolean yes = false;
-
 		for (int i = 0; i < recList.size(); i++) {
 
 			if (rect.getX() == recList.get(i).getX() && rect.getY() == recList.get(i).getY() && i > 1) {
-				yes = true;
+				dead = true;
+				break;
 			} else {
-				yes = false;
+				dead = false;
 			}
 		}
-		return yes;
+		return dead;
 	}
 
 	public static void gameOverSetup() {
- 		//Game Over
+ 		//Game Over 
  		overPane = new GridPane();
  		overScene = new Scene(overPane,HEIGHT,WIDTH);
  		overPane.setStyle("-fx-background-color: #6B6B6B;");
@@ -379,6 +387,7 @@ public class Main extends Application {
  			ColumnConstraints column = new ColumnConstraints(WIDTH/2);
              overPane.getColumnConstraints().add(column);
  		}
+ 		//GEORGE W. BUSH
  		for(int i =0;i<menuRows;i++) {
  			RowConstraints row = new RowConstraints(HEIGHT/2);
  			overPane.getRowConstraints().add(row);
@@ -413,12 +422,11 @@ public class Main extends Application {
 	public static void normalGameModeSetup() {
 
 		root = new Pane();
-	
+	counter = 0;
 		
 		mainScene = new Scene(root, WIDTH, HEIGHT);
 		
-		highscores = new File("C:\\\\Users\\\\justi\\\\eclipse-workspace\\\\ICS3U-Final-Project");
-		// HomeScene = new Scene(grid,400,400);
+//		highscores = new File("C:\\\\Users\\\\justi\\\\eclipse-workspace\\\\ICS3U-Final-Project");
 
 		rect = new Rectangle(4 * CUBESIZE, 0, CUBESIZE, CUBESIZE);
 		recList.add(0, rect);
@@ -519,6 +527,19 @@ public class Main extends Application {
  				
  				
  	}
+//	public int getHighScore() throws IOException {
+////		fr = new FileReader("C:\\Users\\justi\\OneDrive\\Desktop\\DATA10.txt");
+////		int a;
+////		int HighScore = 0;;
+////		int i;
+////	    while ((i=fr.read()) != -1) {
+////	      a = i;
+////	      HighScore = Math.max(a, HighScore);
+////	    }
+////	    
+////		return HighScore;
+////		
+//	}
 	
 	public static void main(String[] args) {
 		launch(args);
