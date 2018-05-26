@@ -447,7 +447,7 @@ public class Main extends Application {
 		h = false;
 		v = false;
 		score = 0;
-		for(int i = 0;i< numRowCol; i++) {
+		/*for(int i = 0;i< numRowCol; i++) {
 			for(int j = 0;j< numRowCol; j++) {
 				Rectangle back = new Rectangle(CUBESIZE,CUBESIZE);
 				back.setX(j*CUBESIZE);
@@ -457,7 +457,7 @@ public class Main extends Application {
 			    background[i][j] = back;
 			    root.getChildren().add(background[i][j]);
 			}
-		}
+		}*/
 		food.setFill(Color.CORNFLOWERBLUE);
 	}
 
