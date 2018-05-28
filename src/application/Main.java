@@ -13,6 +13,7 @@ import javafx.application.Application;
 import javafx.event.*;
 import javafx.geometry.*;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.Duration;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -20,6 +21,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -51,7 +53,7 @@ public class Main extends Application {
 	
 	//pause
 	public static Rectangle pause = new Rectangle(appW,appH);
-	public static Text pausealrt, promt;
+	public static Label pausealrt, prompt;
  	
  	//main menu scene
  	public static Scene homeScene;
@@ -229,7 +231,7 @@ public class Main extends Application {
 					direction = Direction.UP;
 					commence = true;
 					pause.setOpacity(0);
-					promt.setVisible(false);
+					prompt.setVisible(false);
 					pausealrt.setVisible(false);
 				}
 				break;
@@ -240,7 +242,7 @@ public class Main extends Application {
 					direction = Direction.DOWN;
 					commence = true;
 					pause.setOpacity(0);
-					promt.setVisible(false);
+					prompt.setVisible(false);
 					pausealrt.setVisible(false);
 				}
 				break;
@@ -251,7 +253,7 @@ public class Main extends Application {
 					direction = Direction.LEFT;
 					commence = true;
 					pause.setOpacity(0);
-					promt.setVisible(false);
+					prompt.setVisible(false);
 					pausealrt.setVisible(false);
 				}
 				break;
@@ -262,14 +264,14 @@ public class Main extends Application {
 					direction = Direction.RIGHT;
 					commence = true;
 					pause.setOpacity(0);
-					promt.setVisible(false);
+					prompt.setVisible(false);
 					pausealrt.setVisible(false);
 				}
 				break;
 			case P:
 				commence = false;
-				pause.setOpacity(.5);
-				promt.setVisible(true);
+				pause.setOpacity(.75);
+				prompt.setVisible(true);
 				pausealrt.setVisible(true);
 				
 			}
@@ -360,8 +362,6 @@ public class Main extends Application {
 		
 	}
 
-	
-	
 	public static void addLength() {
 		Rectangle body = new Rectangle(CUBESIZE, CUBESIZE);
 				
@@ -569,32 +569,33 @@ public class Main extends Application {
 		scoreBox.setText("Score: "+ score + "");
 		
 		
-		
-		
 		//pause
 		root.getChildren().add(pause);
 		pause.setFill(Color.GREY);
 		pause.setOpacity(0);
 		
 		
-		pausealrt = new Text();
+		pausealrt = new Label();
 		pausealrt.setTextAlignment(TextAlignment.CENTER);
 		root.getChildren().add(pausealrt);
 		pausealrt.setText("Game Paused");
+		pausealrt.setTextFill(Color.BLACK);
 		pausealrt.setFont(Font.font("Bangla MN", 50));
-		pausealrt.setX(appW/4);
-		pausealrt.setY(appH/2);
 		pausealrt.setVisible(false);
+		pausealrt.layoutXProperty().bind(root.widthProperty().subtract(pausealrt.widthProperty()).divide(2));
+		pausealrt.layoutYProperty().bind(root.heightProperty().subtract(pausealrt.heightProperty()).divide(2).subtract(35));
 		
 		
-		promt = new Text();
-		promt.setTextAlignment(TextAlignment.CENTER);
-		root.getChildren().add(promt);
-		promt.setText("Press any movement key to resume");
-		promt.setFont(Font.font("Bangla MN", 20));
-		promt.setX(appW/4-10);
-		promt.setY(appH/2+50);
-		promt.setVisible(false);
+		prompt = new Label();
+		prompt.setTextAlignment(TextAlignment.CENTER);
+		root.getChildren().add(prompt);
+		prompt.setText("Press any movement key to resume");
+		prompt.setTextFill(Color.BLACK);
+		prompt.setFont(Font.font("Bangla MN", 20));
+		prompt.setVisible(false);
+		prompt.layoutXProperty().bind(root.widthProperty().subtract(pausealrt.widthProperty()).divide(2));
+		prompt.layoutYProperty().bind(root.heightProperty().subtract(pausealrt.heightProperty()).divide(2).add(35));
+		
 		
 			
 	}
