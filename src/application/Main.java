@@ -39,6 +39,7 @@ public class Main extends Application {
 	public static final int HEIGHT = numRowCol * CUBESIZE, WIDTH = numRowCol * CUBESIZE;
 	public static final int appH = HEIGHT+(2*border), appW = WIDTH+(2*border)+200;
 	
+	
 	//normal game scene
  	public static Scene mainScene;
  	public static Pane root;
@@ -46,7 +47,11 @@ public class Main extends Application {
  	public static int score;
  	public static long time;
  	public static long start;
-	public static Text scoreBox;
+	public static Text scoreBox, controls;
+	
+	//pause
+	public static Rectangle pause = new Rectangle(appW,appH);
+	public static Text pausealrt, promt;
  	
  	//main menu scene
  	public static Scene homeScene;
@@ -69,7 +74,7 @@ public class Main extends Application {
  	enum Direction{
  		UP, DOWN, RIGHT, LEFT
  	}
- 	public static Direction direction;
+ 	public static Direction direction, current;
  	public static ArrayList<Rectangle> recList = new ArrayList<Rectangle>();
  	public static ArrayList<Double> PrevX = new ArrayList<Double>();
  	public static ArrayList<Double> PrevY = new ArrayList<Double>();
@@ -82,6 +87,7 @@ public class Main extends Application {
  	public static boolean commence, needFood, validLocal;
  	public static boolean h, v;
  	public static Rectangle t,b,r,l;
+ 	public static int cont;
 
 	
 
@@ -99,7 +105,7 @@ public class Main extends Application {
 			
 			normalGameModeSetup();
 			
-			gameOverSetup();
+			
 			gameOver = false;
 			primaryStage.setScene(homeScene);
 			primaryStage.setResizable(false);
@@ -146,17 +152,54 @@ public class Main extends Application {
 									  PrevX.remove(i);
 									  PrevY.remove(i);
 								  }
+								  current = null;
+								  gameOverSetup();
 							     primaryStage.setScene(overScene);
 							  });
 							  pause.play();
 						}
+						
 						else {
 							gameLive();
+							
+							if(cont == 0) {
+								current = direction;
+							}
+							
+							switch (current) {
+							case UP:
+								yVelocity = -velocity;
+								xVelocity =0;
+								break;
+							case DOWN:
+								yVelocity = +velocity;
+								xVelocity =0;
+								break;
+
+							case LEFT:
+								xVelocity = -velocity;
+								yVelocity =0;
+								break;
+
+							case RIGHT:
+								xVelocity = +velocity;
+								yVelocity =0;
+								break;
+							}
 							//double t = (double) (now - start / 1000000000);
-							//if (t % 10 == 0)
+							if (cont % 10 == 0) {
+								current = direction;
 								move();
-								//pause();
+								xVelocity =0;
+								yVelocity = 0;
+										
+							}
+							
+								
+								
+								
 						}
+						cont++;
 
 					}
 				}
@@ -178,58 +221,57 @@ public class Main extends Application {
 
 	public static void bindPlayerControls() {
 		mainScene.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-			// setTrailer();
-
+			
 			switch (event.getCode()) {
+			case W:
 			case UP:
-				if (v == false) {
-					yVelocity = -velocity;
-					xVelocity = 0;
+				if (current != Direction.DOWN) {
+					direction = Direction.UP;
 					commence = true;
-					h = false;
-					v = true;
+					pause.setOpacity(0);
+					promt.setVisible(false);
+					pausealrt.setVisible(false);
 				}
 				break;
 
+			case S:
 			case DOWN:
-				if (v == false) {
-					yVelocity = velocity;
-					xVelocity = 0;
+				if (current != Direction.UP) {
+					direction = Direction.DOWN;
 					commence = true;
-					h = false;
-					v = true;
+					pause.setOpacity(0);
+					promt.setVisible(false);
+					pausealrt.setVisible(false);
 				}
 				break;
-
+			
+			case A:
 			case LEFT:
-				if (h == false) {
-					yVelocity = 0;
-					xVelocity = -velocity;
+				if (current != Direction.RIGHT) {
+					direction = Direction.LEFT;
 					commence = true;
-					h = true;
-					v = false;
+					pause.setOpacity(0);
+					promt.setVisible(false);
+					pausealrt.setVisible(false);
 				}
 				break;
 
+			case D:
 			case RIGHT:
-				if (h == false) {
-					yVelocity = 0;
-					xVelocity = velocity;
+				if (current != Direction.LEFT) {
+					direction = Direction.RIGHT;
 					commence = true;
-					h = true;
-					v = false;
+					pause.setOpacity(0);
+					promt.setVisible(false);
+					pausealrt.setVisible(false);
 				}
 				break;
 			case P:
 				commence = false;
+				pause.setOpacity(.5);
+				promt.setVisible(true);
+				pausealrt.setVisible(true);
 				
-				PauseTransition pause = new PauseTransition(Duration.seconds(3));
-				  pause.setOnFinished(e -> {
-				     
-				  });
-				  pause.play();
-				break;
-			
 			}
 
 		});
@@ -260,21 +302,21 @@ public class Main extends Application {
 
 	
 	public static void addFood() {
-		//do {
-			randx = rx.nextInt(((WIDTH+border)-CUBESIZE)-(CUBESIZE+border))+CUBESIZE;
-			randy = ry.nextInt(((WIDTH+border)-CUBESIZE)-(CUBESIZE+border))+CUBESIZE;
+		do {
+			randx = rx.nextInt(((WIDTH+border)-2*CUBESIZE))+CUBESIZE;
+			randy = ry.nextInt(((WIDTH+border)-2*CUBESIZE))+CUBESIZE;
 			
 			randx = (int)(Math.round(randx/CUBESIZE)*CUBESIZE);
 			randy = (int)(Math.round(randy/CUBESIZE)*CUBESIZE);
 			for(int i = 0; i<recList.size(); i++) {
 				if(randx != recList.get(i).getX() && randy != recList.get(i).getY() ) {
-					validLocal = true;
-				}
-				else {
 					validLocal = false;
 				}
+				else {
+					validLocal = true;
+				}
 			}
-		//}while(validLocal);
+		}while(validLocal);
 		
 		validLocal = false;
 		
@@ -296,48 +338,29 @@ public class Main extends Application {
 			recList.get(i + 1).setX(PrevX.get(i));
 			recList.get(i + 1).setY(PrevY.get(i));
 		}
-/*
-		if (rect.getX() > WIDTH+border) {
-			//rect.setX(0);
+
+		if(rect.getX()+xVelocity < border||rect.getX()+xVelocity >= WIDTH+border) {
 			gameOver=true;
+			
 		}
-		if (rect.getX() < border) {
-			//rect.setX(WIDTH - CUBESIZE);
+		else if(rect.getY()+yVelocity < border || rect.getY()+yVelocity >= HEIGHT+border) {
 			gameOver=true;
-		}
-		if (rect.getY() > HEIGHT+border) {
-			//rect.setY(0);
-			gameOver=true;
-		}
-		if (rect.getY() < border) {
-			//rect.setY(HEIGHT - CUBESIZE);
-			gameOver=true;
-		}*/
-		
-		if(rect.getX() + xVelocity<border|| rect.getX() + xVelocity>(WIDTH+border)){
-			gameOver = true;
-		}
-		else if(rect.getY() + yVelocity<border|| rect.getY() + yVelocity>(HEIGHT)+border){
-			gameOver = true;
+			
 		}
 		else {
 			rect.setX(rect.getX() + xVelocity);
 			rect.setY(rect.getY() + yVelocity);
-		}
-		if (killedYourself()) {
 			
-			gameOver = true;
-			//System.out.println("GameOver");
+			if (killedYourself()) {
+				
+				gameOver = true;
+				//System.out.println("GameOver");
+			}
 		}
 		
 	}
 
-	public static void pause(){
-		PauseTransition pause = new PauseTransition(Duration.seconds(5));
-		  pause.setOnFinished(e -> {
-			  
-		  });
-	}
+	
 	
 	public static void addLength() {
 		Rectangle body = new Rectangle(CUBESIZE, CUBESIZE);
@@ -346,6 +369,7 @@ public class Main extends Application {
 		 		recList.add(recList.size(), body);
 		 		root.getChildren().add(body);
 				body.toBack();
+				//score++;
 	}
 
 	public static boolean isEaten() {
@@ -501,11 +525,19 @@ public class Main extends Application {
 		food = new Rectangle(CUBESIZE, CUBESIZE);
 		root.getChildren().add(food);
 		food.setFill(Color.WHITE);
+		
+		
 		scoreBox = new Text();
 		root.getChildren().add(scoreBox);
-		scoreBox.setX(appW-75);
+		scoreBox.setX(appW-150);
 		scoreBox.setY(appH/4);
-
+		
+		controls = new Text();
+		root.getChildren().add(controls);
+		controls.setX(appW-175);
+		controls.setY(appH/2);
+		controls.setText("Controls: \nUp: up arrow or w \nDown: down arrow or s \nLeft: left arrow or a \nRight: right arrow or d \nPause: P ");
+		
 		commence = false;
 		needFood = true;
 		h = false;
@@ -534,8 +566,37 @@ public class Main extends Application {
 		root.getChildren().addAll(t,b,r,l);
 		
 		food.setFill(Color.CORNFLOWERBLUE);
+		scoreBox.setText("Score: "+ score + "");
 		
 		
+		
+		
+		//pause
+		root.getChildren().add(pause);
+		pause.setFill(Color.GREY);
+		pause.setOpacity(0);
+		
+		
+		pausealrt = new Text();
+		pausealrt.setTextAlignment(TextAlignment.CENTER);
+		root.getChildren().add(pausealrt);
+		pausealrt.setText("Game Paused");
+		pausealrt.setFont(Font.font("Bangla MN", 50));
+		pausealrt.setX(appW/4);
+		pausealrt.setY(appH/2);
+		pausealrt.setVisible(false);
+		
+		
+		promt = new Text();
+		promt.setTextAlignment(TextAlignment.CENTER);
+		root.getChildren().add(promt);
+		promt.setText("Press any movement key to resume");
+		promt.setFont(Font.font("Bangla MN", 20));
+		promt.setX(appW/4-10);
+		promt.setY(appH/2+50);
+		promt.setVisible(false);
+		
+			
 	}
 
 	public static void mainMenuSetup() {
@@ -587,12 +648,13 @@ public class Main extends Application {
  				//Label
  				olabel = new Label();
  				olabel.setText("Chose a game Mode");
- 				olabel.setFont(Font.font ("Verdana", 20));
+ 				olabel.setFont(Font.font ("Bangla MN", 20));
  				olabel.setTextFill(Color.WHITE);
+ 				
  				
  				title = new Label();
  				title.setText("SNAKE GAME");
- 				title.setFont(Font.font ("Verdana", 50));
+ 				title.setFont(Font.font ("Bangla MN", 50));
  				title.setTextFill(Color.WHITE);
  				
  				homePane.getChildren().addAll(olabel,title);
