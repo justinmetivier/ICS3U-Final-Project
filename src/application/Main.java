@@ -35,21 +35,20 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 public class Main extends Application {
-
+	//general variables
 	public static int numRowCol = 25;
 	public static final int CUBESIZE = 25, border = CUBESIZE;
 	public static final int HEIGHT = numRowCol * CUBESIZE, WIDTH = numRowCol * CUBESIZE;
 	public static final int appH = HEIGHT+(2*border), appW = WIDTH+(2*border)+200;
 	
-	
-	//normal game scene
+	//game scene
  	public static Scene mainScene;
  	public static Pane root;
  	public static Label lscore, ltime;
- 	public static int score;
+ 	public static int score, sec = 0, min = 0;
  	public static long time;
  	public static long start;
-	public static Text scoreBox, controls;
+	public static Text Title, timedisp, scoreBox, hSDisp, controls ;
 	
 	//pause
 	public static Rectangle pause = new Rectangle(appW,appH);
@@ -66,11 +65,11 @@ public class Main extends Application {
  	public static Scene overScene;
  	public static GridPane overPane;
  	public static boolean gameOver = false;
- 	public static Label overt,scoredisp;
+ 	public static Label overt,scoredisp,alrt;
  	public static TextField namein;
- 	public static String name;
- 	public static Button submit, back = new Button("Back to Menu");
- 	public static boolean annoying = false;
+ 	public static Button submit = new Button("Submit"), back = new Button("Back to Menu"), quit = new Button("Quit");
+ 	
+ 	
  
  	//Snake and movement
  	enum Direction{
@@ -89,12 +88,14 @@ public class Main extends Application {
  	public static boolean commence, needFood, validLocal;
  	public static boolean h, v;
  	public static Rectangle t,b,r,l;
- 	public static int cont;
+ 	public static int count;
 
-	
-
+ 	//highscores
 	public static File highscores;
-
+	public static int HS1, HS2, HS3;
+	public static String namescore, name;
+	
+	
 	public static int randx, randy;
 	public static Random rx = new Random(), ry = new Random();
 	
@@ -107,6 +108,7 @@ public class Main extends Application {
 			
 			normalGameModeSetup();
 			
+			gameOverSetup();
 			
 			gameOver = false;
 			primaryStage.setScene(homeScene);
@@ -129,7 +131,7 @@ public class Main extends Application {
 			
 			bindPlayerControls();
 
-			start = System.nanoTime();
+			//start = System.nanoTime();
 			
 			primaryStage.show();
 
@@ -145,7 +147,7 @@ public class Main extends Application {
 								  recList.get(i).setFill(Color.RED);
 							  }
 							  
-							  PauseTransition pause = new PauseTransition(Duration.seconds(2));
+							  PauseTransition pause = new PauseTransition(Duration.millis(250));
 							  pause.setOnFinished(e -> {
 								  for (int i = recList.size()-1; i >= 0 ; i--) {
 									  recList.remove(i);
@@ -155,8 +157,12 @@ public class Main extends Application {
 									  PrevY.remove(i);
 								  }
 								  current = null;
-								  gameOverSetup();
+								  count = 0;
+								  min=0;
+								  sec=0;
+								  
 							     primaryStage.setScene(overScene);
+							     scoredisp.setText("Score: "+ score);
 							  });
 							  pause.play();
 						}
@@ -164,7 +170,7 @@ public class Main extends Application {
 						else {
 							gameLive();
 							
-							if(cont == 0) {
+							if(count == 0) {
 								current = direction;
 							}
 							
@@ -189,7 +195,7 @@ public class Main extends Application {
 								break;
 							}
 							//double t = (double) (now - start / 1000000000);
-							if (cont % 10 == 0) {
+							if (count % 10 == 0) {
 								current = direction;
 								move();
 								xVelocity =0;
@@ -197,22 +203,46 @@ public class Main extends Application {
 										
 							}
 							
-								
-								
-								
 						}
-						cont++;
+						count++;
 
 					}
 				}
 
 			}.start();
 			
+			submit.setOnAction(new EventHandler<ActionEvent>() {
+	             @Override
+	             public void handle(ActionEvent event) {
+	            	 if (namein.getText().length() > 3) {
+	            		 alrt.setText("Enter your initials.");
+	            	 }
+	            	 else {
+	            		 PauseTransition pause = new PauseTransition(Duration.millis(100));
+						  pause.setOnFinished(e -> {
+			            	 namescore = namein.getText() + " : " + score;
+			            	 namein.clear();
+			            	 alrt.setText("");
+			            	 start(primaryStage);
+						  });
+						  pause.play();
+	            	 }
+	             }
+	         });
+			
 			back.setOnAction(new EventHandler<ActionEvent>() {
  	            @Override
  	            public void handle(ActionEvent event) {
  	            	
  	            	start(primaryStage);
+ 	            	}
+ 	        });
+			
+			quit.setOnAction(new EventHandler<ActionEvent>() {
+ 	            @Override
+ 	            public void handle(ActionEvent event) {
+ 	            	
+ 	            	primaryStage.close();
  	            	}
  	        });
 
@@ -230,9 +260,7 @@ public class Main extends Application {
 				if (current != Direction.DOWN) {
 					direction = Direction.UP;
 					commence = true;
-					pause.setOpacity(0);
-					prompt.setVisible(false);
-					pausealrt.setVisible(false);
+					houdini();
 				}
 				break;
 
@@ -241,9 +269,7 @@ public class Main extends Application {
 				if (current != Direction.UP) {
 					direction = Direction.DOWN;
 					commence = true;
-					pause.setOpacity(0);
-					prompt.setVisible(false);
-					pausealrt.setVisible(false);
+					houdini();
 				}
 				break;
 			
@@ -252,9 +278,7 @@ public class Main extends Application {
 				if (current != Direction.RIGHT) {
 					direction = Direction.LEFT;
 					commence = true;
-					pause.setOpacity(0);
-					prompt.setVisible(false);
-					pausealrt.setVisible(false);
+					houdini();
 				}
 				break;
 
@@ -263,25 +287,32 @@ public class Main extends Application {
 				if (current != Direction.LEFT) {
 					direction = Direction.RIGHT;
 					commence = true;
-					pause.setOpacity(0);
-					prompt.setVisible(false);
-					pausealrt.setVisible(false);
+					houdini();
 				}
 				break;
+			
 			case P:
 				commence = false;
 				pause.setOpacity(.75);
 				prompt.setVisible(true);
 				pausealrt.setVisible(true);
-				
 			}
 
 		});
 
 	}
 
+	public static void houdini() {
+		pause.setOpacity(0);
+		prompt.setVisible(false);
+		pausealrt.setVisible(false);
+	}
+
+	
+	
 	public static void gameLive() {
 		scoreBox.setText("Score: "+ score + "");
+		timedisp.setText("Time: " + min + ":" +String.format("%02d", sec));
 
 		if (killedYourself()) {
 			
@@ -291,13 +322,21 @@ public class Main extends Application {
 
 		if (isEaten()) {
 			addLength();
-			changeColour();
+			//changeColour();
 			needFood = true;
 			score++;
 		}
 
 		if (needFood == true) {
 			addFood();
+		}
+		
+		if(count % 60 == 0){
+			sec++;
+		}
+		if(sec == 60) {
+			min++;
+			sec = 0;
 		}
 
 	}
@@ -369,6 +408,7 @@ public class Main extends Application {
 		 		recList.add(recList.size(), body);
 		 		root.getChildren().add(body);
 				body.toBack();
+				body.setFill(Color.OLIVEDRAB);
 				//score++;
 	}
 
@@ -381,7 +421,7 @@ public class Main extends Application {
 
 	}
 
-	public static void changeColour() {
+/*	public static void changeColour() {
 		int colour = (int) (Math.random() * 7);
 
 		switch (colour) {
@@ -429,7 +469,7 @@ public class Main extends Application {
 			break;
 		}
 
-	}
+	}*/
 
 	public static boolean killedYourself() {
 		boolean yes = false;
@@ -468,7 +508,7 @@ public class Main extends Application {
  		//Over Title
  		overt = new Label();
  		overt.setText("Game Over");
- 		overt.setFont(Font.font ("Comic Sans", 50));
+ 		overt.setFont(Font.font ("Bangla MN", 50));
  		overt.setTextFill(Color.WHITE);
  		overPane.add(overt, 0, 0); 
  		GridPane.setColumnSpan(overt, 2);
@@ -477,7 +517,7 @@ public class Main extends Application {
  		//score Title
  		scoredisp = new Label();
  		scoredisp.setText("Score: " + score);
- 		scoredisp.setFont(Font.font ("Comic Sans", 50));
+ 		scoredisp.setFont(Font.font ("Bangla MN", 30));
  		scoredisp.setTextFill(Color.WHITE);
  		overPane.add(scoredisp, 0, 1); 
  		GridPane.setColumnSpan(scoredisp, 2);
@@ -487,26 +527,36 @@ public class Main extends Application {
  		overPane.add(back, 0, 1); 
  		GridPane.setColumnSpan(back, 2);
  		GridPane.setHalignment(back, HPos.CENTER);	
+ 		back.setTranslateY(-25);
  		GridPane.setValignment(back, VPos.BOTTOM);
+ 		
+ 		overPane.add(quit, 0, 1); 
+ 		GridPane.setColumnSpan(quit, 2);
+ 		GridPane.setHalignment(quit, HPos.CENTER);
+ 		quit.setTranslateY(25);
+ 		GridPane.setValignment(quit, VPos.BOTTOM);
  		
  		
  		//TextFeild
  		namein = new TextField();
  		overPane.add(namein, 0, 2); 
  		GridPane.setHalignment(namein, HPos.RIGHT);	
+ 		namein.setTranslateX(-25);
  		namein.setPromptText("Enter your initials.");
- 		namein.setPrefWidth(100); 
+ 		namein.setMaxWidth(200); 
+ 		
+ 		alrt = new Label();
+ 		overPane.add(alrt, 0, 2); 
+ 		GridPane.setHalignment(alrt, HPos.RIGHT);
+ 		alrt.setTranslateX(-25);
+ 		alrt.setTranslateY(25);
+ 		
  		submit = new Button();
  		overPane.add(submit, 1, 2); 
  		submit.setText("Submit");
- 		GridPane.setHalignment(submit, HPos.CENTER);	
+ 		GridPane.setHalignment(submit, HPos.LEFT);	
+ 		submit.setTranslateX(25);
  		
- 		submit.setOnAction(new EventHandler<ActionEvent>() {
-             @Override
-             public void handle(ActionEvent event) {
-             	name = namein.getText();
-             }
-         });
  	}
 	
 	public static void normalGameModeSetup() {
@@ -519,24 +569,59 @@ public class Main extends Application {
 		
 
 		rect = new Rectangle(4 * CUBESIZE, border, CUBESIZE, CUBESIZE);
+		rect.setFill(Color.DARKOLIVEGREEN);
 		recList.add(0, rect);
 		root.getChildren().addAll(rect);
+		
+		for(int i = 0;i<2;i++) {
+			Rectangle body = new Rectangle(5 * CUBESIZE + (CUBESIZE*i), border, CUBESIZE,CUBESIZE);
+			root.getChildren().add(body);
+			body.setFill(Color.OLIVEDRAB);
+			recList.add(body);
+		}
 
 		food = new Rectangle(CUBESIZE, CUBESIZE);
 		root.getChildren().add(food);
 		food.setFill(Color.WHITE);
+		food.setFill(Color.CORNFLOWERBLUE);
 		
+		
+		//right display
+		Title = new Text();
+		root.getChildren().add(Title);
+		Title.setX(appW-180);
+		Title.setY(50);
+		Title.setText("SNAKE");
+		Title.setFont(Font.font ("Bangla MN", 40));
+		
+		
+		timedisp = new Text();
+		root.getChildren().add(timedisp);
+		timedisp.setX(appW-175);
+		timedisp.setY(appH/4-50);
+		timedisp.setText("Time: " + min + ":" +String.format("%02d", sec));
 		
 		scoreBox = new Text();
 		root.getChildren().add(scoreBox);
-		scoreBox.setX(appW-150);
+		scoreBox.setX(appW-175);
 		scoreBox.setY(appH/4);
+		scoreBox.setText("Score: "+ score + "");
+		
+		
+		//highscore display
+		hSDisp = new Text();
+		root.getChildren().add(hSDisp);
+		hSDisp.setX(appW-175);
+		hSDisp.setY(appH/4+25);
+		hSDisp.setText("Highscores: \n1. " + HS1 + "\n2. " + HS2 +"\n3. " + HS3);
+		
 		
 		controls = new Text();
 		root.getChildren().add(controls);
 		controls.setX(appW-175);
 		controls.setY(appH/2);
-		controls.setText("Controls: \nUp: up arrow or w \nDown: down arrow or s \nLeft: left arrow or a \nRight: right arrow or d \nPause: P ");
+		controls.setText("Controls: \n\nUp: up arrow or w \n\nDown: down arrow or s "
+				+ "\n\nLeft: left arrow or a \n\nRight: right arrow or d \n\nPause: P ");
 		
 		commence = false;
 		needFood = true;
@@ -555,6 +640,7 @@ public class Main extends Application {
 			}
 		}
 		
+		//borders
 		t = new Rectangle(border,0,WIDTH,border);
 		t.setFill(Color.WHITE);
 		b = new Rectangle(border,appH-border,WIDTH,border);
@@ -565,15 +651,11 @@ public class Main extends Application {
 		l.setFill(Color.WHITE);
 		root.getChildren().addAll(t,b,r,l);
 		
-		food.setFill(Color.CORNFLOWERBLUE);
-		scoreBox.setText("Score: "+ score + "");
-		
 		
 		//pause
 		root.getChildren().add(pause);
 		pause.setFill(Color.GREY);
 		pause.setOpacity(0);
-		
 		
 		pausealrt = new Label();
 		pausealrt.setTextAlignment(TextAlignment.CENTER);
@@ -595,77 +677,74 @@ public class Main extends Application {
 		prompt.setVisible(false);
 		prompt.layoutXProperty().bind(root.widthProperty().subtract(pausealrt.widthProperty()).divide(2));
 		prompt.layoutYProperty().bind(root.heightProperty().subtract(pausealrt.heightProperty()).divide(2).add(35));
-		
-		
 			
 	}
 
 	public static void mainMenuSetup() {
  		//main Menu
- 				homePane = new GridPane();
- 				homeScene = new Scene(homePane,appW,appH);
- 				homePane.setStyle("-fx-background-color: #6B6B6B;");
- 			
- 				for(int i =0; i<menuColumns;i++) {
- 					ColumnConstraints column = new ColumnConstraints(appW/2);
- 		            homePane.getColumnConstraints().add(column);
- 				}
- 				for(int i =0;i<menuRows;i++) {
- 					RowConstraints row = new RowConstraints(appH/4);
- 					homePane.getRowConstraints().add(row);
- 				}
- 				
- 				
- 				
- 				//Normal mode
- 				normal = new Button();
- 				normal.setText("Normal");
- 				homePane.add(normal, 0, 1); 
- 				GridPane.setHalignment(normal, HPos.CENTER);
- 				nExpl = new Label();
- 				nExpl.setTextFill(Color.WHITE);
- 				homePane.add(nExpl,0,2);
- 				nExpl.setText("The normal game mode has no time limit. \n\n"
- 						+ "Try to get as many points as possible without dying");
- 				nExpl.setTextAlignment(TextAlignment.CENTER);
- 				GridPane.setHalignment(nExpl, HPos.CENTER);
- 				GridPane.setValignment(nExpl, VPos.TOP);
- 				
- 				//Speed Mode
- 				speed = new Button();
- 				speed.setText("Speed");
- 				homePane.add(speed, 1, 1);
- 				GridPane.setHalignment(speed, HPos.CENTER);
- 				sExpl = new Label();
- 				sExpl.setTextFill(Color.WHITE);
- 				homePane.add(sExpl,1,2);
- 				sExpl.setText("The speed game mode has a 1 minute time limit. \n\n"
- 						+ "Try to get get as many points in a minute as \npossible without dying");
- 				sExpl.setTextAlignment(TextAlignment.CENTER);
- 				GridPane.setHalignment(sExpl, HPos.CENTER);
- 				GridPane.setValignment(sExpl, VPos.TOP);
- 				
- 				
- 				//Label
- 				olabel = new Label();
- 				olabel.setText("Chose a game Mode");
- 				olabel.setFont(Font.font ("Bangla MN", 20));
- 				olabel.setTextFill(Color.WHITE);
- 				
- 				
- 				title = new Label();
- 				title.setText("SNAKE GAME");
- 				title.setFont(Font.font ("Bangla MN", 50));
- 				title.setTextFill(Color.WHITE);
- 				
- 				homePane.getChildren().addAll(olabel,title);
- 				GridPane.setColumnSpan(olabel, 2);
- 				GridPane.setHalignment(olabel, HPos.CENTER);
- 				GridPane.setValignment(olabel, VPos.BOTTOM);
- 				
- 				GridPane.setColumnSpan(title, 2);
- 				GridPane.setHalignment(title, HPos.CENTER);
- 				GridPane.setValignment(title, VPos.TOP);
+		homePane = new GridPane();
+		homeScene = new Scene(homePane,appW,appH);
+		homePane.setStyle("-fx-background-color: #6B6B6B;");
+	
+		for(int i =0; i<menuColumns;i++) {
+			ColumnConstraints column = new ColumnConstraints(appW/2);
+            homePane.getColumnConstraints().add(column);
+		}
+		for(int i =0;i<menuRows;i++) {
+			RowConstraints row = new RowConstraints(appH/4);
+			homePane.getRowConstraints().add(row);
+		}
+		
+		
+		
+		//Normal mode
+		normal = new Button();
+		normal.setText("Normal");
+		homePane.add(normal, 0, 1); 
+		GridPane.setHalignment(normal, HPos.CENTER);
+		nExpl = new Label();
+		nExpl.setTextFill(Color.WHITE);
+		homePane.add(nExpl,0,2);
+		nExpl.setText("The normal game mode has no time limit. \n\n"
+				+ "Try to get as many points as possible without dying");
+		nExpl.setTextAlignment(TextAlignment.CENTER);
+		GridPane.setHalignment(nExpl, HPos.CENTER);
+		GridPane.setValignment(nExpl, VPos.TOP);
+		
+		//Speed Mode
+		speed = new Button();
+		speed.setText("Speed");
+		homePane.add(speed, 1, 1);
+		GridPane.setHalignment(speed, HPos.CENTER);
+		sExpl = new Label();
+		sExpl.setTextFill(Color.WHITE);
+		homePane.add(sExpl,1,2);
+		sExpl.setText("The speed game mode has a 1 minute time limit. \n\n"
+				+ "Try to get get as many points in a minute as \npossible without dying");
+		sExpl.setTextAlignment(TextAlignment.CENTER);
+		GridPane.setHalignment(sExpl, HPos.CENTER);
+		GridPane.setValignment(sExpl, VPos.TOP);
+		
+		
+		//Label
+		olabel = new Label();
+		olabel.setText("Chose a game Mode");
+		olabel.setFont(Font.font ("Bangla MN", 20));
+		olabel.setTextFill(Color.WHITE);
+		
+		title = new Label();
+		title.setText("SNAKE GAME");
+		title.setFont(Font.font ("Bangla MN", 50));
+		title.setTextFill(Color.WHITE);
+		
+		homePane.getChildren().addAll(olabel,title);
+		GridPane.setColumnSpan(olabel, 2);
+		GridPane.setHalignment(olabel, HPos.CENTER);
+		GridPane.setValignment(olabel, VPos.BOTTOM);
+		
+		GridPane.setColumnSpan(title, 2);
+		GridPane.setHalignment(title, HPos.CENTER);
+		GridPane.setValignment(title, VPos.TOP);
  				
  				
  	}
