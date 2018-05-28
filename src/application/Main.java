@@ -215,7 +215,10 @@ public class Main extends Application {
 	             @Override
 	             public void handle(ActionEvent event) {
 	            	 if (namein.getText().length() > 3) {
-	            		 alrt.setText("Enter your initials.");
+	            		 alrt.setText("Only initials with 3 characters are valid. \n- too many");
+	            	 }
+	            	 else if (namein.getText().length() < 3) {
+	            		 alrt.setText("Only initials with 3 characters are valid. \n- too few");
 	            	 }
 	            	 else {
 	            		 PauseTransition pause = new PauseTransition(Duration.millis(100));
@@ -549,7 +552,8 @@ public class Main extends Application {
  		overPane.add(alrt, 0, 2); 
  		GridPane.setHalignment(alrt, HPos.RIGHT);
  		alrt.setTranslateX(-25);
- 		alrt.setTranslateY(25);
+ 		alrt.setTranslateY(40);
+ 		alrt.setText("on the input of a valid input value a \nrederect to the main menu will occur");
  		
  		submit = new Button();
  		overPane.add(submit, 1, 2); 
