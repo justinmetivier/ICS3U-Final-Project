@@ -1,5 +1,6 @@
 package application;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -37,19 +38,19 @@ import javafx.scene.text.TextAlignment;
 
 public class Main extends Application {
 
-	public static int numRowCol = 35;
-	public static final int CUBESIZE = 20;
-	public static final int HEIGHT = numRowCol * CUBESIZE;
-	public static final int WIDTH = numRowCol * CUBESIZE;
+	public static int numRowCol = 25;
+	public static final int CUBESIZE = 25, border = CUBESIZE;
+	public static final int HEIGHT = numRowCol * CUBESIZE, WIDTH = numRowCol * CUBESIZE;
+	public static final int appH = HEIGHT+(2*border), appW = WIDTH+(2*border)+200;
 	
 	//normal game scene
  	public static Scene mainScene;
- 	public static BorderPane border;
  	public static Pane root;
  	public static Label lscore, ltime;
  	public static int score;
  	public static long time;
  	public static long start;
+	public static Text scoreBox;
  	
  	//main menu scene
  	public static Scene homeScene;
@@ -62,10 +63,10 @@ public class Main extends Application {
  	public static Scene overScene;
  	public static GridPane overPane;
  	public static boolean gameOver = false;
- 	public static Label overt;
+ 	public static Label overt,scoredisp;
  	public static TextField namein;
  	public static String name;
- 	public static Button submit;
+ 	public static Button submit, back = new Button("Back to Menu");
  	public static boolean annoying = false;
  
  	//Snake and movement
@@ -78,21 +79,20 @@ public class Main extends Application {
  	public static ArrayList<Double> PrevY = new ArrayList<Double>();
 	public static Rectangle[][] background = new Rectangle [numRowCol][numRowCol];
  	public static Rectangle rect, rect2, rect3, rect4, rect5;
- 	public static int xVelocity = 0, yVelocity = 0;
+ 	public static double xVelocity = 0, yVelocity = 0;
  	public static double prevX = 0, prevY = 0;
- 	public static int xTotal = 0, yTotal = 0;
- 	public static int leftOrRight = 0, upOrDown = 0;
- 	public static int velocity = CUBESIZE;
- 	public static int step;
+ 	public static double velocity = CUBESIZE;
  	public static Rectangle food;
  	public static boolean commence, needFood, validLocal;
  	public static boolean h, v;
-	public static Text scoreBox;
-	public static int counter;
+ 	public static Rectangle t,b,r,l;
+
+	
+
+	public static File highscores;
+
 	public static int randx, randy;
 	public static Random rx = new Random(), ry = new Random();
-	public static boolean dead;
-	public static FileReader fr;
 	
 
 
@@ -104,9 +104,9 @@ public class Main extends Application {
 			normalGameModeSetup();
 			
 			gameOverSetup();
-			
-			
+			gameOver = false;
 			primaryStage.setScene(homeScene);
+			primaryStage.setResizable(false);
 			
 			normal.setOnAction(new EventHandler<ActionEvent>() {
  	            @Override
@@ -126,37 +126,54 @@ public class Main extends Application {
 			bindPlayerControls();
 
 			start = System.nanoTime();
-		
-
+			
 			primaryStage.show();
 
 			new AnimationTimer() {
 				@Override
 				public void handle(long now) {
-					gameLive();
-					
+
 					if (commence == true) {
 						if(gameOver) {
+							this.stop();
 							 rect.setFill(Color.RED);
-							 food.setFill(Color.RED);
 							  for(int i = 0; i < recList.size(); i++) {
 								  recList.get(i).setFill(Color.RED);
 							  }
-							  this.stop();
-							  PauseTransition pause = new PauseTransition(Duration.seconds(1));
+							  
+							  PauseTransition pause = new PauseTransition(Duration.seconds(2));
 							  pause.setOnFinished(e -> {
+								  for (int i = recList.size()-1; i >= 0 ; i--) {
+									  recList.remove(i);
+								  }
+								  for (int i = PrevX.size()-1; i >= 0 ; i--) {
+									  PrevX.remove(i);
+									  PrevY.remove(i);
+								  }
 							     primaryStage.setScene(overScene);
 							  });
 							  pause.play();
 						}
-						double t = (double) (now - start / 1000000000);
-						if (t %3 == 0)
-							move();
+						else {
+							gameLive();
+							double t = (double) (now - start / 1000000000);
+							if (t % 4 == 0)
+								move();
+								//pause();
+						}
 
 					}
 				}
 
 			}.start();
+			
+			back.setOnAction(new EventHandler<ActionEvent>() {
+ 	            @Override
+ 	            public void handle(ActionEvent event) {
+ 	            	
+ 	            	start(primaryStage);
+ 	            	}
+ 	        });
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -172,7 +189,6 @@ public class Main extends Application {
 				if (v == false) {
 					yVelocity = -velocity;
 					xVelocity = 0;
-					upOrDown = 1;
 					commence = true;
 					h = false;
 					v = true;
@@ -183,7 +199,6 @@ public class Main extends Application {
 				if (v == false) {
 					yVelocity = velocity;
 					xVelocity = 0;
-					upOrDown = 2;
 					commence = true;
 					h = false;
 					v = true;
@@ -194,26 +209,29 @@ public class Main extends Application {
 				if (h == false) {
 					yVelocity = 0;
 					xVelocity = -velocity;
-					upOrDown = 0;
 					commence = true;
 					h = true;
 					v = false;
 				}
 				break;
-			
 
 			case RIGHT:
 				if (h == false) {
 					yVelocity = 0;
 					xVelocity = velocity;
-					upOrDown = 0;
 					commence = true;
 					h = true;
 					v = false;
 				}
 				break;
 			case P:
-				gameOver=true;
+				commence = false;
+				
+				PauseTransition pause = new PauseTransition(Duration.seconds(3));
+				  pause.setOnFinished(e -> {
+				     
+				  });
+				  pause.play();
 				break;
 			
 			}
@@ -223,19 +241,19 @@ public class Main extends Application {
 	}
 
 	public static void gameLive() {
-		scoreBox.setText(score + "");
+		scoreBox.setText("Score: "+ score + "");
 
 		if (killedYourself()) {
 			
 			gameOver = true;
-			System.out.println("GameOver");
+			//System.out.println("GameOver");
 		}
 
 		if (isEaten()) {
 			addLength();
 			changeColour();
 			needFood = true;
-			//score++;
+			score++;
 		}
 
 		if (needFood == true) {
@@ -244,14 +262,25 @@ public class Main extends Application {
 
 	}
 
+	
 	public static void addFood() {
 		//do {
-			randx = rx.nextInt((WIDTH-CUBESIZE)-CUBESIZE)+CUBESIZE;
-			randy = ry.nextInt((HEIGHT-CUBESIZE)-CUBESIZE)+CUBESIZE;
+			randx = rx.nextInt(((WIDTH+border)-CUBESIZE)-(CUBESIZE+border))+CUBESIZE;
+			randy = ry.nextInt(((WIDTH+border)-CUBESIZE)-(CUBESIZE+border))+CUBESIZE;
 			
 			randx = (int)(Math.round(randx/CUBESIZE)*CUBESIZE);
 			randy = (int)(Math.round(randy/CUBESIZE)*CUBESIZE);
-			
+			for(int i = 0; i<recList.size(); i++) {
+				if(randx != recList.get(i).getX() && randy != recList.get(i).getY() ) {
+					validLocal = true;
+				}
+				else {
+					validLocal = false;
+				}
+			}
+		//}while(validLocal);
+		
+		validLocal = false;
 		
 		food.setX(randx);
 		food.setY(randy);
@@ -271,32 +300,49 @@ public class Main extends Application {
 			recList.get(i + 1).setX(PrevX.get(i));
 			recList.get(i + 1).setY(PrevY.get(i));
 		}
-
-		if (rect.getX() > WIDTH) {
-			rect.setX(0);
-//			gameOver=true;
+/*
+		if (rect.getX() > WIDTH+border) {
+			//rect.setX(0);
+			gameOver=true;
 		}
-		if (rect.getX() < 0) {
-			rect.setX(WIDTH - CUBESIZE);
-//			gameOver=true;
+		if (rect.getX() < border) {
+			//rect.setX(WIDTH - CUBESIZE);
+			gameOver=true;
 		}
-		if (rect.getY() > HEIGHT)
-		{
-			rect.setY(0);
-//			gameOver=true;
+		if (rect.getY() > HEIGHT+border) {
+			//rect.setY(0);
+			gameOver=true;
 		}
-		if (rect.getY() < 0) {
-			rect.setY(HEIGHT - CUBESIZE);
-//			gameOver=true;
+		if (rect.getY() < border) {
+			//rect.setY(HEIGHT - CUBESIZE);
+			gameOver=true;
+		}*/
+		
+		if(rect.getX() + xVelocity<border|| rect.getX() + xVelocity>(WIDTH+border)){
+			gameOver = true;
 		}
-
-		xTotal += xVelocity;
-		yTotal += yVelocity;
-		rect.setX(rect.getX() + xVelocity);
-		rect.setY(rect.getY() + yVelocity);
-
+		else if(rect.getY() + yVelocity<border|| rect.getY() + yVelocity>(HEIGHT)+border){
+			gameOver = true;
+		}
+		else {
+			rect.setX(rect.getX() + xVelocity);
+			rect.setY(rect.getY() + yVelocity);
+		}
+		if (killedYourself()) {
+			
+			gameOver = true;
+			//System.out.println("GameOver");
+		}
+		
 	}
 
+	public static void pause(){
+		PauseTransition pause = new PauseTransition(Duration.seconds(5));
+		  pause.setOnFinished(e -> {
+			  
+		  });
+	}
+	
 	public static void addLength() {
 		Rectangle body = new Rectangle(CUBESIZE, CUBESIZE);
 				
@@ -304,13 +350,13 @@ public class Main extends Application {
 		 		recList.add(recList.size(), body);
 		 		root.getChildren().add(body);
 				body.toBack();
-				counter++;
 	}
 
 	public static boolean isEaten() {
 		if (rect.getX() == food.getX() && rect.getY() == food.getY()) {
 			return true;
-		} else
+
+		}else
 			return false;
 
 	}
@@ -366,30 +412,37 @@ public class Main extends Application {
 	}
 
 	public static boolean killedYourself() {
+		boolean yes = false;
+
 		for (int i = 0; i < recList.size(); i++) {
 
 			if (rect.getX() == recList.get(i).getX() && rect.getY() == recList.get(i).getY() && i > 1) {
-				dead = true;
+				yes = true;
 				break;
-			} else {
-				dead = false;
+			} 
+			else if(rect.getX() < border || rect.getX() > (WIDTH+border)||+
+					rect.getY() < border || rect.getY() > (HEIGHT+border)) {
+				yes = true;
+				break;
+			}
+			else {
+				yes = false;
 			}
 		}
-		return dead;
+		return yes;
 	}
 
 	public static void gameOverSetup() {
- 		//Game Over 
+ 		//Game Over
  		overPane = new GridPane();
- 		overScene = new Scene(overPane,HEIGHT,WIDTH);
+ 		overScene = new Scene(overPane,appW,appH);
  		overPane.setStyle("-fx-background-color: #6B6B6B;");
  		for(int i =0; i< menuColumns;i++) {
- 			ColumnConstraints column = new ColumnConstraints(WIDTH/2);
+ 			ColumnConstraints column = new ColumnConstraints(appW/2);
              overPane.getColumnConstraints().add(column);
  		}
- 		//GEORGE W. BUSH
  		for(int i =0;i<menuRows;i++) {
- 			RowConstraints row = new RowConstraints(HEIGHT/2);
+ 			RowConstraints row = new RowConstraints(appH/3);
  			overPane.getRowConstraints().add(row);
  		}
  		//Over Title
@@ -401,13 +454,30 @@ public class Main extends Application {
  		GridPane.setColumnSpan(overt, 2);
  		GridPane.setHalignment(overt, HPos.CENTER);	
  		
+ 		//score Title
+ 		scoredisp = new Label();
+ 		scoredisp.setText("Score: " + score);
+ 		scoredisp.setFont(Font.font ("Comic Sans", 50));
+ 		scoredisp.setTextFill(Color.WHITE);
+ 		overPane.add(scoredisp, 0, 1); 
+ 		GridPane.setColumnSpan(scoredisp, 2);
+ 		GridPane.setHalignment(scoredisp, HPos.CENTER);	
+ 		GridPane.setValignment(scoredisp, VPos.TOP);
+ 		
+ 		overPane.add(back, 0, 1); 
+ 		GridPane.setColumnSpan(back, 2);
+ 		GridPane.setHalignment(back, HPos.CENTER);	
+ 		GridPane.setValignment(back, VPos.BOTTOM);
+ 		
+ 		
  		//TextFeild
  		namein = new TextField();
- 		overPane.add(namein, 0, 1); 
+ 		overPane.add(namein, 0, 2); 
  		GridPane.setHalignment(namein, HPos.RIGHT);	
  		namein.setPromptText("Enter your initials.");
+ 		namein.setPrefWidth(100); 
  		submit = new Button();
- 		overPane.add(submit, 1, 1); 
+ 		overPane.add(submit, 1, 2); 
  		submit.setText("Submit");
  		GridPane.setHalignment(submit, HPos.CENTER);	
  		
@@ -422,13 +492,13 @@ public class Main extends Application {
 	public static void normalGameModeSetup() {
 
 		root = new Pane();
-	counter = 0;
+	
+		mainScene = new Scene(root,appW, appH);
 		
-		mainScene = new Scene(root, WIDTH, HEIGHT);
+		highscores = new File("C:\\\\Users\\\\justi\\\\eclipse-workspace\\\\ICS3U-Final-Project");
 		
-//		highscores = new File("C:\\\\Users\\\\justi\\\\eclipse-workspace\\\\ICS3U-Final-Project");
 
-		rect = new Rectangle(4 * CUBESIZE, 0, CUBESIZE, CUBESIZE);
+		rect = new Rectangle(4 * CUBESIZE, border, CUBESIZE, CUBESIZE);
 		recList.add(0, rect);
 		root.getChildren().addAll(rect);
 
@@ -437,8 +507,8 @@ public class Main extends Application {
 		food.setFill(Color.WHITE);
 		scoreBox = new Text();
 		root.getChildren().add(scoreBox);
-		scoreBox.setX(0);
-		scoreBox.setY(0);
+		scoreBox.setX(appW-75);
+		scoreBox.setY(appH/4);
 
 		commence = false;
 		needFood = true;
@@ -448,34 +518,45 @@ public class Main extends Application {
 		for(int i = 0;i< numRowCol; i++) {
 			for(int j = 0;j< numRowCol; j++) {
 				Rectangle back = new Rectangle(CUBESIZE,CUBESIZE);
-				back.setX(j*CUBESIZE);
-				back.setY(i*CUBESIZE);
+				back.setX((j*CUBESIZE)+border);
+				back.setY((i*CUBESIZE)+border);
 				back.setFill(Color.TRANSPARENT);
-			    back.setStroke(Color.BLACK);
+			    back.setStroke(Color.GREY);
 			    background[i][j] = back;
 			    root.getChildren().add(background[i][j]);
 			}
 		}
+		
+		t = new Rectangle(border,0,WIDTH,border);
+		t.setFill(Color.WHITE);
+		b = new Rectangle(border,appH-border,WIDTH,border);
+		b.setFill(Color.WHITE);
+		r = new Rectangle(WIDTH+border,0,border,appH);
+		r.setFill(Color.WHITE);
+		l = new Rectangle(0,0,border,appH);
+		l.setFill(Color.WHITE);
+		root.getChildren().addAll(t,b,r,l);
+		
 		food.setFill(Color.CORNFLOWERBLUE);
+		
+		
 	}
 
 	public static void mainMenuSetup() {
  		//main Menu
  				homePane = new GridPane();
- 				homeScene = new Scene(homePane,HEIGHT,WIDTH);
+ 				homeScene = new Scene(homePane,appW,appH);
  				homePane.setStyle("-fx-background-color: #6B6B6B;");
  			
  				for(int i =0; i<menuColumns;i++) {
- 					ColumnConstraints column = new ColumnConstraints(WIDTH/2);
+ 					ColumnConstraints column = new ColumnConstraints(appW/2);
  		            homePane.getColumnConstraints().add(column);
  				}
  				for(int i =0;i<menuRows;i++) {
- 					RowConstraints row = new RowConstraints(HEIGHT/4);
+ 					RowConstraints row = new RowConstraints(appH/4);
  					homePane.getRowConstraints().add(row);
  				}
- 				
- 				
- 				
+ 				 				
  				//Normal mode
  				normal = new Button();
  				normal.setText("Normal");
@@ -527,19 +608,44 @@ public class Main extends Application {
  				
  				
  	}
-//	public int getHighScore() throws IOException {
-////		fr = new FileReader("C:\\Users\\justi\\OneDrive\\Desktop\\DATA10.txt");
-////		int a;
-////		int HighScore = 0;;
-////		int i;
-////	    while ((i=fr.read()) != -1) {
-////	      a = i;
-////	      HighScore = Math.max(a, HighScore);
-////	    }
-////	    
-////		return HighScore;
-////		
-//	}
+	
+	public static int getHighScore() {
+		int HighScore = 0;
+		  String fileName = "Highscores.txt";
+
+	        // This will reference one line at a time
+	        String line = null;
+
+	        try {
+	            // FileReader reads text files in the default encoding.
+	            FileReader fileReader = 
+	                new FileReader(fileName);
+
+	            // Always wrap FileReader in BufferedReader.
+	            BufferedReader bufferedReader = 
+	                new BufferedReader(fileReader);
+
+	            while((line = bufferedReader.readLine()) != null) {
+	            	int a = Integer.parseInt(line);
+	                HighScore=Math.max(a, HighScore);
+	            }   
+
+	            // Always close files.
+	            bufferedReader.close();         
+	        }
+	        catch(FileNotFoundException ex) {
+	            System.out.println(
+	                "Unable to open file '" + 
+	                fileName + "'");                
+	        }
+	        catch(IOException ex) {
+	            System.out.println(
+	                "Error reading file '" 
+	                + fileName + "'");   
+	        }
+	            
+		return HighScore;
+	}
 	
 	public static void main(String[] args) {
 		launch(args);
