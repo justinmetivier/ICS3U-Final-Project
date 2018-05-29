@@ -858,6 +858,8 @@ public class Main extends Application {
 		
 	}
 	
+	
+	//Temp Method to test sorting
 	public static void outputScores() {
 		convertToFinal();
 		for(int i = 0; i<10; i++) {
