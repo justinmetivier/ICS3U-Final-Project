@@ -799,6 +799,7 @@ public class Main extends Application {
 	}
 	
 	public static void orderScores() {
+		addScores();
 		for(int i = 0; i< scores.size(); i++) {
 			for(int j = 0; j<i;j++) {
 				int current = 0;
@@ -828,7 +829,6 @@ public class Main extends Application {
 	}
 	
 	public static void addToTable() {
-		addScores();
 		orderScores();
 		
 		int smaller=Math.min(10, scores.size());
@@ -839,24 +839,34 @@ public class Main extends Application {
 		
 	}
 	
+	//prevents null pointer exception
+	public static void fillTable() {
+		for(int i = 0; i<10; i++) {
+			finalTable[i] = "No Score Yet";
+		}
+	}
+	
+	
 	public static void convertToFinal() {
+		fillTable();
 		addToTable();
 		
-		int smaller=Math.min(10, scores.size());
+		int small=Math.min(10, scores.size());
 
-		for(int i = 0; i<smaller; i++) {
-			int score = 0;
-			if(finalTable[i].length()==5) {
-				score = (finalTable[i].charAt(3)-48)*10 + finalTable[i].charAt(4)-48;
+		for(int a = 0; a<small; a++) {
+			int finalScore = 0;
+			if(finalTable[a].length()==5) {
+				finalScore = (finalTable[a].charAt(3)-48)*10 + finalTable[a].charAt(4)-48;
 			} else {
-				score = finalTable[i].charAt(3)-48;
+				finalScore = finalTable[a].charAt(3)-48;
 			}
 			
-			finalTable[i] = (""+finalTable[i].charAt(0)+finalTable[i].charAt(1)+
-					finalTable[i].charAt(2)+ " - " + score);
+			finalTable[a] = (""+finalTable[a].charAt(0)+finalTable[a].charAt(1)+
+					finalTable[a].charAt(2)+ " - " + finalScore);
 		}
 		
 	}
+	
 	
 	
 	//Temp Method to test sorting
