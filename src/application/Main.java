@@ -445,55 +445,6 @@ public class Main extends Application {
 
 	}
 
-/*	public static void changeColour() {
-		int colour = (int) (Math.random() * 7);
-
-		switch (colour) {
-		case 0:
-			for (int i = 0; i < recList.size(); i++) {
-				recList.get(i).setFill(Color.RED);
-			}
-
-			break;
-		case 1:
-			for (int i = 0; i < recList.size(); i++) {
-				recList.get(i).setFill(Color.TURQUOISE);
-			}
-
-			break;
-		case 2:
-			for (int i = 0; i < recList.size(); i++) {
-				recList.get(i).setFill(Color.YELLOW);
-			}
-
-			break;
-		case 3:
-			for (int i = 0; i < recList.size(); i++) {
-				recList.get(i).setFill(Color.BLUE);
-			}
-
-			break;
-		case 4:
-			for (int i = 0; i < recList.size(); i++) {
-				recList.get(i).setFill(Color.GREEN);
-			}
-
-			break;
-		case 5:
-			for (int i = 0; i < recList.size(); i++) {
-				recList.get(i).setFill(Color.PURPLE);
-			}
-
-			break;
-		case 6:
-			for (int i = 0; i < recList.size(); i++) {
-				recList.get(i).setFill(Color.PINK);
-			}
-
-			break;
-		}
-
-	}*/
 
 	public static boolean killedYourself() {
 		boolean yes = false;
