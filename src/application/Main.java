@@ -1,7 +1,13 @@
 package application;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -10,14 +16,20 @@ import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.*;
 import javafx.geometry.*;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.util.Callback;
 import javafx.util.Duration;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -84,20 +96,28 @@ public class Main extends Application {
  	public static double xVelocity = 0, yVelocity = 0;
  	public static double prevX = 0, prevY = 0;
  	public static double velocity = CUBESIZE;
- 	public static Rectangle food;
  	public static boolean commence, needFood, validLocal;
  	public static boolean h, v;
  	public static Rectangle t,b,r,l;
  	public static int count;
 
+ 	//food
+ 	public static Rectangle food;
+ 	public static int randx, randy;
+	public static Random rx = new Random(), ry = new Random();
+	
  	//highscores
 	public static File highscores;
 	public static int HS1, HS2, HS3;
 	public static String namescore, name;
+	public static ArrayList<String> scores = new ArrayList<>();
+	public static String[] finalTable = new String[10];
+	public static Text menuTable = new Text(), tableTitle = new Text(), subTitle = new Text();
 	
 	
-	public static int randx, randy;
-	public static Random rx = new Random(), ry = new Random();
+	
+	
+	
 	
 
 
@@ -121,13 +141,13 @@ public class Main extends Application {
  	            	}
  	        });
  			
- 			speed.setOnAction(new EventHandler<ActionEvent>() {
+ 			/*speed.setOnAction(new EventHandler<ActionEvent>() {
  	            @Override
  	            public void handle(ActionEvent event) {
  	            	//primaryStage.setScene(sGameScene); 
  	            	System.out.println("Game Mode not availble");
  	            	}
- 	        });
+ 	        });*/
 			
 			bindPlayerControls();
 
@@ -224,6 +244,7 @@ public class Main extends Application {
 	            		 PauseTransition pause = new PauseTransition(Duration.millis(100));
 						  pause.setOnFinished(e -> {
 			            	 namescore = namein.getText() + " : " + score;
+			            	 writeScore(namein.getText(), score);
 			            	 namein.clear();
 			            	 alrt.setText("");
 			            	 start(primaryStage);
@@ -320,7 +341,7 @@ public class Main extends Application {
 		if (killedYourself()) {
 			
 			gameOver = true;
-			//System.out.println("GameOver");
+			
 		}
 
 		if (isEaten()) {
@@ -398,7 +419,7 @@ public class Main extends Application {
 			if (killedYourself()) {
 				
 				gameOver = true;
-				//System.out.println("GameOver");
+				
 			}
 		}
 		
@@ -686,6 +707,7 @@ public class Main extends Application {
 
 	public static void mainMenuSetup() {
  		//main Menu
+		convertToFinal();
 		homePane = new GridPane();
 		homeScene = new Scene(homePane,appW,appH);
 		homePane.setStyle("-fx-background-color: #6B6B6B;");
@@ -715,6 +737,10 @@ public class Main extends Application {
 		GridPane.setHalignment(nExpl, HPos.CENTER);
 		GridPane.setValignment(nExpl, VPos.TOP);
 		
+		//highscores table
+		totalyNotAHardCodeATable();
+		
+		/*
 		//Speed Mode
 		speed = new Button();
 		speed.setText("Speed");
@@ -728,7 +754,7 @@ public class Main extends Application {
 		sExpl.setTextAlignment(TextAlignment.CENTER);
 		GridPane.setHalignment(sExpl, HPos.CENTER);
 		GridPane.setValignment(sExpl, VPos.TOP);
-		
+		*/
 		
 		//Label
 		olabel = new Label();
@@ -753,6 +779,158 @@ public class Main extends Application {
  				
  	}
 	
+	public static void writeScore(String a, int b) {
+		  try{    
+	           FileWriter fw=new FileWriter("Highscores.txt");    
+	           fw.write(a + "" + b);    
+	           fw.close();    
+	          }catch(Exception e){System.out.println(e);}      
+	}
+	
+
+	public static void addScores() {
+		int HighScore = 0;
+		String fileName = "Highscores.txt";
+
+		String line = null;
+
+		try {
+			FileReader fileReader = new FileReader(fileName);
+
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+			while ((line = bufferedReader.readLine()) != null) {
+				
+				scores.add(line);
+				
+			}
+
+			// Always close files.
+			bufferedReader.close();
+		} catch (FileNotFoundException ex) {
+			System.out.println("Unable to open file '" + fileName + "'");
+		} catch (IOException ex) {
+			System.out.println("Error reading file '" + fileName + "'");
+		}
+	}
+	
+	public static void orderScores() {
+		addScores();
+		for(int i = 0; i< scores.size(); i++) {
+			for(int j = 0; j<i;j++) {
+				int current = 0;
+				int scrolling = 0;
+				if(scores.get(i).length()==5) {
+					current = (scores.get(i).charAt(3)-48)*10 + scores.get(i).charAt(4)-48;
+				} else {
+					current = scores.get(i).charAt(3)-48;
+				}
+				
+				if(scores.get(j).length()==5) {
+					scrolling = (scores.get(j).charAt(3)-48)*10 + scores.get(j).charAt(4)-48;
+				} else {
+					scrolling = scores.get(j).charAt(3)-48;
+				}
+				
+			if(scrolling<current) {
+				scores.add(j, scores.get(i));
+				scores.remove(i+1);
+				break;
+			}
+			
+			}
+		}
+		
+		
+	}
+	
+	public static void addToTable() {
+		orderScores();
+		
+		int smaller=Math.min(10, scores.size());
+		
+		for(int i = 0; i<smaller; i++) {
+			finalTable[i] = scores.get(i);
+		}
+		
+	}
+	
+	//prevents null pointer exception
+	public static void fillTable() {
+		for(int i = 0; i<10; i++) {
+			finalTable[i] = "No Score Yet";
+		}
+	}
+	
+	
+	public static void convertToFinal() {
+		fillTable();
+		addToTable();
+		
+		int small=Math.min(10, scores.size());
+
+		for(int a = 0; a<small; a++) {
+			int finalScore = 0;
+			if(finalTable[a].length()==5) {
+				finalScore = (finalTable[a].charAt(3)-48)*10 + finalTable[a].charAt(4)-48;
+			} else {
+				finalScore = finalTable[a].charAt(3)-48;
+			}
+			
+			finalTable[a] = (""+finalTable[a].charAt(0)+finalTable[a].charAt(1)+
+					finalTable[a].charAt(2)+ " - " + finalScore);
+		}
+		
+	}
+	
+	
+	
+	//Temp Method to test sorting
+	public static void outputScores() {
+		convertToFinal();
+		for(int i = 0; i<10; i++) {
+			System.out.println(finalTable[i]);
+		}
+		
+	}
+	
+	public static void totalyNotAHardCodeATable() {
+		convertToFinal();
+		tableTitle.setText("HIGH SCORES"); 
+		tableTitle.setFont(Font.font ("Bangla MN", 20));
+		tableTitle.setFill(Color.WHITE);
+		homePane.add(tableTitle, 1, 1);
+		GridPane.setRowSpan(tableTitle, 2);
+		GridPane.setHalignment(tableTitle, HPos.CENTER);
+		GridPane.setValignment(tableTitle, VPos.CENTER);
+		tableTitle.setTranslateY(-60);
+		tableTitle.setTextAlignment(TextAlignment.CENTER);
+		
+		subTitle.setText("Inicials : Score"); 
+		subTitle.setFont(Font.font ("Bangla MN", 15));
+		subTitle.setFill(Color.WHITE);
+		homePane.add(subTitle, 1, 1);
+		GridPane.setRowSpan(subTitle, 2);
+		GridPane.setHalignment(subTitle, HPos.CENTER);
+		GridPane.setValignment(subTitle, VPos.CENTER);
+		subTitle.setTranslateY(-35);
+		subTitle.setTextAlignment(TextAlignment.CENTER);
+		
+		menuTable.setText(finalTable[0]+"\n"+finalTable[1]+"\n"+finalTable[2]+"\n"+finalTable[3]+"\n"
+		+finalTable[4]+"\n"+finalTable[5]+"\n"+finalTable[6]+"\n"+finalTable[7]+"\n"+finalTable[8]+
+		"\n"+finalTable[9]+"\n");
+		
+		menuTable.setFill(Color.WHITE);
+		homePane.add(menuTable, 1, 1);
+		GridPane.setRowSpan(menuTable, 2);
+		GridPane.setHalignment(menuTable, HPos.CENTER);
+		GridPane.setValignment(menuTable, VPos.CENTER);
+		menuTable.setTranslateY(+60);
+		menuTable.setTextAlignment(TextAlignment.CENTER);
+    }	
+	
+	
+
 	public static void main(String[] args) {
 		launch(args);
 	}
