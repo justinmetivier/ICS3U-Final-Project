@@ -129,39 +129,35 @@ public class Main extends Application {
 			normal.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent event) {
+					//sets up main scene
 					primaryStage.setScene(mainScene);
 				}
 			});
 
-			/*
-			 * speed.setOnAction(new EventHandler<ActionEvent>() {
-			 * 
-			 * @Override public void handle(ActionEvent event) {
-			 * //primaryStage.setScene(sGameScene);
-			 * System.out.println("Game Mode not availble"); } });
-			 */
 
 			bindPlayerControls();
 
-			// start = System.nanoTime();
 
 			primaryStage.show();
 
 			new AnimationTimer() {
 				@Override
 				public void handle(long now) {
-					
-					//if the game isnt paused
+
+					// if the game isnt paused
 					if (commence == true) {
+						// transition to the gameover screen
 						if (gameOver) {
 							this.stop();
 							rect.setFill(Color.RED);
+							// sets body to red
 							for (int i = 0; i < recList.size(); i++) {
 								recList.get(i).setFill(Color.RED);
 							}
 
 							PauseTransition pause = new PauseTransition(Duration.millis(250));
 							pause.setOnFinished(e -> {
+								// removes all values from arraylists in order to reset game
 								for (int i = recList.size() - 1; i >= 0; i--) {
 									recList.remove(i);
 								}
@@ -169,6 +165,7 @@ public class Main extends Application {
 									PrevX.remove(i);
 									PrevY.remove(i);
 								}
+								// resets values
 								current = null;
 								count = 0;
 								min = 0;
@@ -182,13 +179,12 @@ public class Main extends Application {
 
 						else {
 							gameLive();
-
+							// initial move
 							if (count == 0) {
 								current = direction;
 							}
-							
-							//movement code taking input from the enum to adjust 
 
+							// movement code taking input from the enum to adjust
 							switch (current) {
 							case UP:
 								yVelocity = -velocity;
@@ -209,7 +205,7 @@ public class Main extends Application {
 								yVelocity = 0;
 								break;
 							}
-							//slows the movement down to every 10 cycles
+							// slows the movement down to every 10 cycles
 							if (count % 10 == 0) {
 								current = direction;
 								move();
@@ -229,6 +225,7 @@ public class Main extends Application {
 			submit.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent event) {
+					// checks to make sure input is valid of exactly 3 characters
 					if (namein.getText().length() > 3) {
 						alrt.setText("Only initials with 3 characters are valid. \n- too many");
 					} else if (namein.getText().length() < 3) {
@@ -247,7 +244,6 @@ public class Main extends Application {
 				}
 			});
 
-
 			quit.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent event) {
@@ -264,7 +260,7 @@ public class Main extends Application {
 	public static void bindPlayerControls() {
 		mainScene.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
 
-			//binds keys to movement patterns
+			// binds keys to movement patterns
 			switch (event.getCode()) {
 			case W:
 			case UP:
@@ -313,34 +309,38 @@ public class Main extends Application {
 
 	}
 
+	// makes the pause menu disappear
 	public static void houdini() {
 		pause.setOpacity(0);
 		prompt.setVisible(false);
 		pausealrt.setVisible(false);
 	}
 
-	//method which houses all methods that run during the game
+	// method which houses all methods that run during the game
 	public static void gameLive() {
 		scoreBox.setText("Score: " + score + "");
 		timedisp.setText("Time: " + min + ":" + String.format("%02d", sec));
 
-		if (killedYourself()) {
+		// checks if you ran into yourself
+		if (died()) {
 
 			gameOver = true;
 
 		}
+		// checks if you ate the food and adds length
 
 		if (isEaten()) {
 			addLength();
-			// changeColour();
 			needFood = true;
 			score++;
 		}
 
+		// spawns the food to a new location
 		if (needFood == true) {
 			addFood();
 		}
 
+		// timer
 		if (count % 60 == 0) {
 			sec++;
 		}
@@ -351,7 +351,7 @@ public class Main extends Application {
 
 	}
 
-	//method that randomly sets the coords of the food
+	// method that randomly sets the coords of the food
 	public static void addFood() {
 		do {
 			randx = rx.nextInt(((WIDTH + border) - 2 * CUBESIZE)) + CUBESIZE;
@@ -379,28 +379,34 @@ public class Main extends Application {
 
 	}
 
-	//method that moves all the body parts to the previous position of the one infront of it
+	// method that moves all the body parts to the previous position of the one
+	// infront of it
 	public void move() {
+		// adds the x and y coordinates to two arraylists
 		for (int i = 0; i < recList.size() - 1; i++) {
 			PrevX.add(i, recList.get(i).getX());
 			PrevY.add(i, recList.get(i).getY());
 		}
+		// sets the x and y to the previous coordinates of the rectangle infront
 		for (int i = 0; i < recList.size() - 1; i++) {
 			recList.get(i + 1).setX(PrevX.get(i));
 			recList.get(i + 1).setY(PrevY.get(i));
 		}
 
+		// checks if you exit the boundaries
 		if (rect.getX() + xVelocity < border || rect.getX() + xVelocity >= WIDTH + border) {
 			gameOver = true;
-
 		} else if (rect.getY() + yVelocity < border || rect.getY() + yVelocity >= HEIGHT + border) {
 			gameOver = true;
 
 		} else {
+			// sets the x and y to their current position plus the velocity set by platyer
+			// controls
 			rect.setX(rect.getX() + xVelocity);
 			rect.setY(rect.getY() + yVelocity);
 
-			if (killedYourself()) {
+			// checks if you died
+			if (died()) {
 
 				gameOver = true;
 
@@ -409,7 +415,7 @@ public class Main extends Application {
 
 	}
 
-	//adds a rectangle to the body
+	// adds a rectangle to the body
 	public static void addLength() {
 		Rectangle body = new Rectangle(CUBESIZE, CUBESIZE);
 
@@ -420,10 +426,12 @@ public class Main extends Application {
 		body.setFill(Color.OLIVEDRAB);
 		// score++;
 	}
-	
-	//boolean method which checks if you have successfully eaten one of the food rectangles
+
+	// boolean method which checks if you have successfully eaten one of the food
+	// rectangles
 
 	public static boolean isEaten() {
+		// checks if the coords of the head are equal to the coords of the food
 		if (rect.getX() == food.getX() && rect.getY() == food.getY()) {
 			return true;
 
@@ -432,15 +440,17 @@ public class Main extends Application {
 
 	}
 
-// boolean method that checks if you have run into yourself
-	public static boolean killedYourself() {
+	// boolean method that checks if you have run into yourself
+	public static boolean died() {
 		boolean yes = false;
 
+		// loops through all body rectangles and checks if head has same coordinates
 		for (int i = 0; i < recList.size(); i++) {
-
 			if (rect.getX() == recList.get(i).getX() && rect.getY() == recList.get(i).getY() && i > 1) {
 				yes = true;
 				break;
+				//if snake exceeds boundaries of the board//adds columns and rows to the gridpane
+
 			} else if (rect.getX() < border || rect.getX() > (WIDTH + border) || +rect.getY() < border
 					|| rect.getY() > (HEIGHT + border)) {
 				yes = true;
@@ -457,6 +467,7 @@ public class Main extends Application {
 		overPane = new GridPane();
 		overScene = new Scene(overPane, appW, appH);
 		overPane.setStyle("-fx-background-color: #6B6B6B;");
+		// adds columns and rows to the gridpane
 		for (int i = 0; i < menuColumns; i++) {
 			ColumnConstraints column = new ColumnConstraints(appW / 2);
 			overPane.getColumnConstraints().add(column);
@@ -484,19 +495,13 @@ public class Main extends Application {
 		GridPane.setHalignment(scoredisp, HPos.CENTER);
 		GridPane.setValignment(scoredisp, VPos.TOP);
 
-//		overPane.add(back, 0, 1);
-//		GridPane.setColumnSpan(back, 2);
-//		GridPane.setHalignment(back, HPos.CENTER);
-//		back.setTranslateY(-25);
-//		GridPane.setValignment(back, VPos.BOTTOM);
-
 		overPane.add(quit, 0, 1);
 		GridPane.setColumnSpan(quit, 2);
 		GridPane.setHalignment(quit, HPos.CENTER);
 		quit.setTranslateY(25);
 		GridPane.setValignment(quit, VPos.BOTTOM);
 
-		// TextFeild
+		// TextField
 		namein = new TextField();
 		overPane.add(namein, 0, 2);
 		GridPane.setHalignment(namein, HPos.RIGHT);
@@ -525,13 +530,12 @@ public class Main extends Application {
 
 		mainScene = new Scene(root, appW, appH);
 
-		highscores = new File("C:\\\\Users\\\\justi\\\\eclipse-workspace\\\\ICS3U-Final-Project");
-
 		rect = new Rectangle(4 * CUBESIZE, border, CUBESIZE, CUBESIZE);
 		rect.setFill(Color.DARKOLIVEGREEN);
 		recList.add(0, rect);
 		root.getChildren().addAll(rect);
 
+		// makes initial snake of length 3
 		for (int i = 0; i < 2; i++) {
 			Rectangle body = new Rectangle(5 * CUBESIZE + (CUBESIZE * i), border, CUBESIZE, CUBESIZE);
 			root.getChildren().add(body);
@@ -583,6 +587,7 @@ public class Main extends Application {
 		h = false;
 		v = false;
 		score = 0;
+		// makes grid on screen
 		for (int i = 0; i < numRowCol; i++) {
 			for (int j = 0; j < numRowCol; j++) {
 				Rectangle back = new Rectangle(CUBESIZE, CUBESIZE);
@@ -640,7 +645,7 @@ public class Main extends Application {
 		homePane = new GridPane();
 		homeScene = new Scene(homePane, appW, appH);
 		homePane.setStyle("-fx-background-color: #6B6B6B;");
-
+		// adds columns and rows to the gridpane
 		for (int i = 0; i < menuColumns; i++) {
 			ColumnConstraints column = new ColumnConstraints(appW / 2);
 			homePane.getColumnConstraints().add(column);
@@ -664,18 +669,8 @@ public class Main extends Application {
 		GridPane.setHalignment(nExpl, HPos.CENTER);
 		GridPane.setValignment(nExpl, VPos.TOP);
 
-		// highscores table
-		totalyNotAHardCodeATable();
-
-		/*
-		 * //Speed Mode speed = new Button(); speed.setText("Speed");
-		 * homePane.add(speed, 1, 1); GridPane.setHalignment(speed, HPos.CENTER); sExpl
-		 * = new Label(); sExpl.setTextFill(Color.WHITE); homePane.add(sExpl,1,2);
-		 * sExpl.setText("The speed game mode has a 1 minute time limit. \n\n" +
-		 * "Try to get get as many points in a minute as \npossible without dying");
-		 * sExpl.setTextAlignment(TextAlignment.CENTER); GridPane.setHalignment(sExpl,
-		 * HPos.CENTER); GridPane.setValignment(sExpl, VPos.TOP);
-		 */
+		// shows highscores table
+		displayHighScores();
 
 		// Label
 		olabel = new Label();
@@ -699,30 +694,35 @@ public class Main extends Application {
 
 	}
 
-	//method that writes the score of the game to the text file
+	// method that writes the score of the game to the text file
+	// sourced from https://www.youtube.com/watch?v=WEZRc0GoP3E
 	public static void writeScore(String a, int b) {
 		try {
-			FileWriter fw = new FileWriter("Highscores.txt",true);
-			fw.write(a + "" + b +"\n");
+			FileWriter fw = new FileWriter("Highscores.txt", true);
+			fw.write(a + "" + b + "\n");
 			fw.close();
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 	}
 
-	//fills the arraylist with a blank value
+	// fills the arraylist with a blank value (TST0)
 	public static void fillScores() {
 		for (int i = 0; i < 20; i++) {
 			scores.add("TST0");
 		}
 	}
-	//removes elements from arraylist
+
+	// removes elements all from arraylist
 	public static void removeAll() {
-		for(int i = 0; i<scores.size();i++) {
+		for (int i = 0; i < scores.size(); i++) {
 			scores.remove(0);
 		}
 	}
-//adds all the scores to the arraylist
+
+	// adds all the scores to the arraylist
+	// sourced from
+	// https://www.caveofprogramming.com/java/java-file-reading-and-writing-files-in-java.html
 	public static void addScores() {
 		removeAll();
 		fillScores();
@@ -751,23 +751,29 @@ public class Main extends Application {
 		}
 	}
 
-	//sorts the scores into the correct order of greatest to least score
+	// sorts the scores into the correct order of greatest to least score
 	public static void orderScores() {
 		addScores();
+		// position of static score
 		for (int i = 0; i < scores.size(); i++) {
-			inner: for (int j = 0; j < i; j++) {
+
+			inner:
+			// position of all scores that are before the static one
+			for (int j = 0; j < i; j++) {
 				int current = 0;
 				int scrolling = 0;
+				// determines the value of the static value
 
 				for (int a = 0; a < scores.get(i).length() - 3; a++) {
 					current += (scores.get(i).charAt(a + 3) - 48) * Math.pow(10, scores.get(i).length() - 3 - (a + 1));
 				}
-
-
+				// determines the value of the score which keeps moving through
 				for (int a = 0; a < scores.get(j).length() - 3; a++) {
-					scrolling += (scores.get(j).charAt(a + 3) - 48) * Math.pow(10, scores.get(j).length() - 3 - (a + 1));
+					scrolling += (scores.get(j).charAt(a + 3) - 48)
+							* Math.pow(10, scores.get(j).length() - 3 - (a + 1));
 				}
-
+				// if a score before is less than the current, the current is inserted into this
+				// index
 				if (scrolling < current) {
 					scores.add(j, scores.get(i));
 					scores.remove(i + 1);
@@ -779,35 +785,36 @@ public class Main extends Application {
 
 	}
 
-	//adds top 10 scores to the final score array
+	// adds top 10 scores to the final score array
 	public static void addToTable() {
 		orderScores();
 		for (int i = 0; i < 10; i++) {
-			finalTable[i] = scores.get(i );
+			finalTable[i] = scores.get(i);
 		}
 
 	}
 
 	// prevents null pointer exception
 	public static void fillTable() {
+		// fills finalTable so is not null
 		for (int i = 0; i < 10; i++) {
 			finalTable[i] = "No Score Yet";
 		}
 	}
 
-	//converts the score from data form into displayable form
+	// converts the score from data form into displayable form
 	public static void convertToFinal() {
 		fillTable();
 		addToTable();
 
-		int small = Math.min(10, scores.size());
-
-		for (int a = 0; a < small; a++) {
-
+		for (int a = 0; a < 10; a++) {
+			// if score is not a placeholder
 			if (finalTable[a].equals("TST0") == false) {
 				int finalScore = 0;
+				// calculates value of the score part of the string
 				for (int i = 0; i < finalTable[a].length() - 3; i++) {
-					finalScore += (finalTable[a].charAt(i + 3) - 48) * Math.pow(10, finalTable[a].length() - 3 - (i + 1));
+					finalScore += (finalTable[a].charAt(i + 3) - 48)
+							* Math.pow(10, finalTable[a].length() - 3 - (i + 1));
 				}
 
 				finalTable[a] = ("" + finalTable[a].charAt(0) + finalTable[a].charAt(1) + finalTable[a].charAt(2)
@@ -819,9 +826,8 @@ public class Main extends Application {
 
 	}
 
-
-	//displays the highscores
-	public static void totalyNotAHardCodeATable() {
+	// displays the highscores
+	public static void displayHighScores() {
 		convertToFinal();
 		tableTitle.setText("HIGH SCORES");
 		tableTitle.setFont(Font.font("Bangla MN", 20));
