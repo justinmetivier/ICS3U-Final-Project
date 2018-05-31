@@ -709,8 +709,8 @@ public class Main extends Application {
 	//method that writes the score of the game to the text file
 	public static void writeScore(String a, int b) {
 		try {
-			FileWriter fw = new FileWriter("Highscores.txt");
-			fw.write(a + "" + b);
+			FileWriter fw = new FileWriter("Highscores.txt",true);
+			fw.write(a + "" + b +"\n");
 			fw.close();
 		} catch (Exception e) {
 			System.out.println(e);
@@ -723,8 +723,15 @@ public class Main extends Application {
 			scores.add("TST0");
 		}
 	}
+	//removes elements from arraylist
+	public static void removeAll() {
+		for(int i = 0; i<scores.size();i++) {
+			scores.remove(0);
+		}
+	}
 //adds all the scores to the arraylist
 	public static void addScores() {
+		removeAll();
 		fillScores();
 		int HighScore = 0;
 		String fileName = "Highscores.txt";
@@ -783,7 +790,7 @@ public class Main extends Application {
 	public static void addToTable() {
 		orderScores();
 		for (int i = 0; i < 10; i++) {
-			finalTable[i] = scores.get(i * 2);
+			finalTable[i] = scores.get(i );
 		}
 
 	}
