@@ -1,6 +1,5 @@
 package application;
 
-//TODO: ADD LOOP WHICH CAN CALCULATE SCORE FOR ANY NUMBEr OF DIGITS
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -151,7 +150,8 @@ public class Main extends Application {
 			new AnimationTimer() {
 				@Override
 				public void handle(long now) {
-
+					
+					//if the game isnt paused
 					if (commence == true) {
 						if (gameOver) {
 							this.stop();
@@ -186,6 +186,8 @@ public class Main extends Application {
 							if (count == 0) {
 								current = direction;
 							}
+							
+							//movement code taking input from the enum to adjust 
 
 							switch (current) {
 							case UP:
@@ -207,7 +209,7 @@ public class Main extends Application {
 								yVelocity = 0;
 								break;
 							}
-							// double t = (double) (now - start / 1000000000);
+							//slows the movement down to every 10 cycles
 							if (count % 10 == 0) {
 								current = direction;
 								move();
@@ -269,6 +271,7 @@ public class Main extends Application {
 	public static void bindPlayerControls() {
 		mainScene.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
 
+			//binds keys to movement patterns
 			switch (event.getCode()) {
 			case W:
 			case UP:
@@ -323,6 +326,7 @@ public class Main extends Application {
 		pausealrt.setVisible(false);
 	}
 
+	//method which houses all methods that run during the game
 	public static void gameLive() {
 		scoreBox.setText("Score: " + score + "");
 		timedisp.setText("Time: " + min + ":" + String.format("%02d", sec));
@@ -354,6 +358,7 @@ public class Main extends Application {
 
 	}
 
+	//method that randomly sets the coords of the food
 	public static void addFood() {
 		do {
 			randx = rx.nextInt(((WIDTH + border) - 2 * CUBESIZE)) + CUBESIZE;
@@ -381,6 +386,7 @@ public class Main extends Application {
 
 	}
 
+	//method that moves all the body parts to the previous position of the one infront of it
 	public void move() {
 		for (int i = 0; i < recList.size() - 1; i++) {
 			PrevX.add(i, recList.get(i).getX());
@@ -410,6 +416,7 @@ public class Main extends Application {
 
 	}
 
+	//adds a rectangle to the body
 	public static void addLength() {
 		Rectangle body = new Rectangle(CUBESIZE, CUBESIZE);
 
@@ -420,6 +427,8 @@ public class Main extends Application {
 		body.setFill(Color.OLIVEDRAB);
 		// score++;
 	}
+	
+	//boolean method which checks if you have successfully eaten one of the food rectangles
 
 	public static boolean isEaten() {
 		if (rect.getX() == food.getX() && rect.getY() == food.getY()) {
@@ -430,35 +439,7 @@ public class Main extends Application {
 
 	}
 
-	/*
-	 * public static void changeColour() { int colour = (int) (Math.random() * 7);
-	 * 
-	 * switch (colour) { case 0: for (int i = 0; i < recList.size(); i++) {
-	 * recList.get(i).setFill(Color.RED); }
-	 * 
-	 * break; case 1: for (int i = 0; i < recList.size(); i++) {
-	 * recList.get(i).setFill(Color.TURQUOISE); }
-	 * 
-	 * break; case 2: for (int i = 0; i < recList.size(); i++) {
-	 * recList.get(i).setFill(Color.YELLOW); }
-	 * 
-	 * break; case 3: for (int i = 0; i < recList.size(); i++) {
-	 * recList.get(i).setFill(Color.BLUE); }
-	 * 
-	 * break; case 4: for (int i = 0; i < recList.size(); i++) {
-	 * recList.get(i).setFill(Color.GREEN); }
-	 * 
-	 * break; case 5: for (int i = 0; i < recList.size(); i++) {
-	 * recList.get(i).setFill(Color.PURPLE); }
-	 * 
-	 * break; case 6: for (int i = 0; i < recList.size(); i++) {
-	 * recList.get(i).setFill(Color.PINK); }
-	 * 
-	 * break; }
-	 * 
-	 * }
-	 */
-
+// boolean method that checks if you have run into yourself
 	public static boolean killedYourself() {
 		boolean yes = false;
 
@@ -725,6 +706,7 @@ public class Main extends Application {
 
 	}
 
+	//method that writes the score of the game to the text file
 	public static void writeScore(String a, int b) {
 		try {
 			FileWriter fw = new FileWriter("Highscores.txt");
@@ -735,12 +717,13 @@ public class Main extends Application {
 		}
 	}
 
+	//fills the arraylist with a blank value
 	public static void fillScores() {
 		for (int i = 0; i < 20; i++) {
 			scores.add("TST0");
 		}
 	}
-
+//adds all the scores to the arraylist
 	public static void addScores() {
 		fillScores();
 		int HighScore = 0;
@@ -768,6 +751,7 @@ public class Main extends Application {
 		}
 	}
 
+	//sorts the scores into the correct order of greatest to least score
 	public static void orderScores() {
 		addScores();
 		for (int i = 0; i < scores.size(); i++) {
@@ -795,6 +779,7 @@ public class Main extends Application {
 
 	}
 
+	//adds top 10 scores to the final score array
 	public static void addToTable() {
 		orderScores();
 		for (int i = 0; i < 10; i++) {
@@ -810,6 +795,7 @@ public class Main extends Application {
 		}
 	}
 
+	//converts the score from data form into displayable form
 	public static void convertToFinal() {
 		fillTable();
 		addToTable();
@@ -833,15 +819,8 @@ public class Main extends Application {
 
 	}
 
-	// Temp Method to test sorting
-	public static void outputScores() {
-		convertToFinal();
-		for (int i = 0; i < 10; i++) {
-			System.out.println(finalTable[i]);
-		}
 
-	}
-
+	//displays the highscores
 	public static void totalyNotAHardCodeATable() {
 		convertToFinal();
 		tableTitle.setText("HIGH SCORES");
