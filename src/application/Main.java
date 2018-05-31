@@ -1,5 +1,6 @@
 package application;
 
+//TODO: ADD LOOP WHICH CAN CALCULATE SCORE FOR ANY NUMBEr OF DIGITS
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -773,16 +774,14 @@ public class Main extends Application {
 			inner: for (int j = 0; j < i; j++) {
 				int current = 0;
 				int scrolling = 0;
-				if (scores.get(i).length() == 5) {
-					current = (scores.get(i).charAt(3) - 48) * 10 + scores.get(i).charAt(4) - 48;
-				} else {
-					current = scores.get(i).charAt(3) - 48;
+
+				for (int a = 0; a < scores.get(i).length() - 3; a++) {
+					current += (scores.get(i).charAt(a + 3) - 48) * Math.pow(10, scores.get(i).length() - 3 - (a + 1));
 				}
 
-				if (scores.get(j).length() == 5) {
-					scrolling = (scores.get(j).charAt(3) - 48) * 10 + scores.get(j).charAt(4) - 48;
-				} else {
-					scrolling = scores.get(j).charAt(3) - 48;
+
+				for (int a = 0; a < scores.get(j).length() - 3; a++) {
+					scrolling += (scores.get(j).charAt(a + 3) - 48) * Math.pow(10, scores.get(j).length() - 3 - (a + 1));
 				}
 
 				if (scrolling < current) {
@@ -821,10 +820,8 @@ public class Main extends Application {
 
 			if (finalTable[a].equals("TST0") == false) {
 				int finalScore = 0;
-				if (finalTable[a].length() == 5) {
-					finalScore = (finalTable[a].charAt(3) - 48) * 10 + finalTable[a].charAt(4) - 48;
-				} else {
-					finalScore = finalTable[a].charAt(3) - 48;
+				for (int i = 0; i < finalTable[a].length() - 3; i++) {
+					finalScore += (finalTable[a].charAt(i + 3) - 48) * Math.pow(10, finalTable[a].length() - 3 - (i + 1));
 				}
 
 				finalTable[a] = ("" + finalTable[a].charAt(0) + finalTable[a].charAt(1) + finalTable[a].charAt(2)
