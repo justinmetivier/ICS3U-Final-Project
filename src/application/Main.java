@@ -79,7 +79,7 @@ public class Main extends Application {
 	public static boolean gameOver = false;
 	public static Label overt, scoredisp, alrt;
 	public static TextField namein;
-	public static Button submit = new Button("Submit"), back = new Button("Back to Menu"), quit = new Button("Quit");
+	public static Button submit = new Button("Submit"), quit = new Button("Quit");
 
 	// Snake and movement
 	enum Direction {
@@ -247,13 +247,6 @@ public class Main extends Application {
 				}
 			});
 
-			back.setOnAction(new EventHandler<ActionEvent>() {
-				@Override
-				public void handle(ActionEvent event) {
-
-					start(primaryStage);
-				}
-			});
 
 			quit.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
@@ -491,11 +484,11 @@ public class Main extends Application {
 		GridPane.setHalignment(scoredisp, HPos.CENTER);
 		GridPane.setValignment(scoredisp, VPos.TOP);
 
-		overPane.add(back, 0, 1);
-		GridPane.setColumnSpan(back, 2);
-		GridPane.setHalignment(back, HPos.CENTER);
-		back.setTranslateY(-25);
-		GridPane.setValignment(back, VPos.BOTTOM);
+//		overPane.add(back, 0, 1);
+//		GridPane.setColumnSpan(back, 2);
+//		GridPane.setHalignment(back, HPos.CENTER);
+//		back.setTranslateY(-25);
+//		GridPane.setValignment(back, VPos.BOTTOM);
 
 		overPane.add(quit, 0, 1);
 		GridPane.setColumnSpan(quit, 2);
