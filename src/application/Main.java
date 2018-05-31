@@ -556,8 +556,8 @@ public class Main extends Application {
 		root.getChildren().add(Title);
 		Title.setX(appW - 180);
 		Title.setY(50);
-		Title.setText("Hungry Slug");
-		Title.setFont(Font.font("Bangla MN", 40));
+		Title.setText("Hungry\nSlug");
+		Title.setFont(Font.font("Bangla MN", 32));
 
 		timedisp = new Text();
 		root.getChildren().add(timedisp);
