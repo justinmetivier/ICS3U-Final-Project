@@ -58,8 +58,7 @@ public class Main extends Application {
 	public static Pane root;
 	public static Label lscore, ltime;
 	public static int score, sec = 0, min = 0;
-	public static long time;
-	public static long start;
+	public static long time, start;
 	public static Text Title, timedisp, scoreBox, hSDisp, controls;
 
 	// pause
@@ -85,19 +84,16 @@ public class Main extends Application {
 	enum Direction {
 		UP, DOWN, RIGHT, LEFT
 	}
-
 	public static Direction direction, current;
 	public static ArrayList<Rectangle> recList = new ArrayList<Rectangle>();
 	public static ArrayList<Double> PrevX = new ArrayList<Double>();
 	public static ArrayList<Double> PrevY = new ArrayList<Double>();
 	public static Rectangle[][] background = new Rectangle[numRowCol][numRowCol];
-	public static Rectangle rect, rect2, rect3, rect4, rect5;
+	public static Rectangle rect, t, b, r, l;
 	public static double xVelocity = 0, yVelocity = 0;
 	public static double prevX = 0, prevY = 0;
 	public static double velocity = CUBESIZE;
 	public static boolean commence, needFood, validLocal;
-	public static boolean h, v;
-	public static Rectangle t, b, r, l;
 	public static int count;
 
 	// food
@@ -154,7 +150,7 @@ public class Main extends Application {
 							for (int i = 0; i < recList.size(); i++) {
 								recList.get(i).setFill(Color.RED);
 							}
-
+							//allows for a pause before switching to the game over scene
 							PauseTransition pause = new PauseTransition(Duration.millis(250));
 							pause.setOnFinished(e -> {
 								// removes all values from arraylists in order to reset game
@@ -207,6 +203,12 @@ public class Main extends Application {
 							}
 							// slows the movement down to every 10 cycles
 							if (count % 10 == 0) {
+								/*two enum values of current and direction prevents 
+								the input direction from contradicting the current
+								
+								this current = direction only happens when the 
+								snake is at the end of a cell
+								*/
 								current = direction;
 								move();
 								xVelocity = 0;
@@ -215,13 +217,16 @@ public class Main extends Application {
 							}
 
 						}
+						//checks for how many times the animation timer has run 
 						count++;
 
 					}
 				}
 
 			}.start();
-
+			
+			
+			//Submit button for initials
 			submit.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent event) {
@@ -244,6 +249,7 @@ public class Main extends Application {
 				}
 			});
 
+			//quits the stage
 			quit.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent event) {
@@ -260,7 +266,7 @@ public class Main extends Application {
 	public static void bindPlayerControls() {
 		mainScene.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
 
-			// binds keys to movement patterns
+			// binds keys to movement patterns and checks if input contradicts current
 			switch (event.getCode()) {
 			case W:
 			case UP:
@@ -299,6 +305,7 @@ public class Main extends Application {
 				break;
 
 			case P:
+				//pauses game and adds overlay
 				commence = false;
 				pause.setOpacity(.75);
 				prompt.setVisible(true);
@@ -351,14 +358,17 @@ public class Main extends Application {
 
 	}
 
-	// method that randomly sets the coords of the food
+	// method that randomly sets the coordinates of the food
 	public static void addFood() {
 		do {
 			randx = rx.nextInt(((WIDTH + border) - 2 * CUBESIZE)) + CUBESIZE;
 			randy = ry.nextInt(((WIDTH + border) - 2 * CUBESIZE)) + CUBESIZE;
-
+			
+			//rounds x and y to the make shift grid
 			randx = (int) (Math.round(randx / CUBESIZE) * CUBESIZE);
 			randy = (int) (Math.round(randy / CUBESIZE) * CUBESIZE);
+			
+			//loops to make sure the x and y don't overlap the snake
 			for (int i = 0; i < recList.size(); i++) {
 				if (randx != recList.get(i).getX() && randy != recList.get(i).getY()) {
 					validLocal = false;
@@ -424,7 +434,6 @@ public class Main extends Application {
 		root.getChildren().add(body);
 		body.toBack();
 		body.setFill(Color.OLIVEDRAB);
-		// score++;
 	}
 
 	// boolean method which checks if you have successfully eaten one of the food
@@ -449,8 +458,8 @@ public class Main extends Application {
 			if (rect.getX() == recList.get(i).getX() && rect.getY() == recList.get(i).getY() && i > 1) {
 				yes = true;
 				break;
-				//if snake exceeds boundaries of the board//adds columns and rows to the gridpane
-
+				
+				//if snake exceeds boundaries of the board//adds columns and rows to the "gridpane"
 			} else if (rect.getX() < border || rect.getX() > (WIDTH + border) || +rect.getY() < border
 					|| rect.getY() > (HEIGHT + border)) {
 				yes = true;
@@ -463,10 +472,11 @@ public class Main extends Application {
 	}
 
 	public static void gameOverSetup() {
-		// Game Over
+		// Game Over 
 		overPane = new GridPane();
 		overScene = new Scene(overPane, appW, appH);
 		overPane.setStyle("-fx-background-color: #6B6B6B;");
+		
 		// adds columns and rows to the gridpane
 		for (int i = 0; i < menuColumns; i++) {
 			ColumnConstraints column = new ColumnConstraints(appW / 2);
@@ -476,6 +486,7 @@ public class Main extends Application {
 			RowConstraints row = new RowConstraints(appH / 3);
 			overPane.getRowConstraints().add(row);
 		}
+		
 		// Over Title
 		overt = new Label();
 		overt.setText("Game Over");
@@ -495,6 +506,7 @@ public class Main extends Application {
 		GridPane.setHalignment(scoredisp, HPos.CENTER);
 		GridPane.setValignment(scoredisp, VPos.TOP);
 
+		//quit button
 		overPane.add(quit, 0, 1);
 		GridPane.setColumnSpan(quit, 2);
 		GridPane.setHalignment(quit, HPos.CENTER);
@@ -508,7 +520,8 @@ public class Main extends Application {
 		namein.setTranslateX(-25);
 		namein.setPromptText("Enter your initials.");
 		namein.setMaxWidth(200);
-
+		
+		//invalid alert for textfeild
 		alrt = new Label();
 		overPane.add(alrt, 0, 2);
 		GridPane.setHalignment(alrt, HPos.RIGHT);
@@ -516,6 +529,7 @@ public class Main extends Application {
 		alrt.setTranslateY(40);
 		alrt.setText("on the input of a valid input value a \nrederect to the main menu will occur");
 
+		//submit button
 		submit = new Button();
 		overPane.add(submit, 1, 2);
 		submit.setText("Submit");
@@ -525,11 +539,9 @@ public class Main extends Application {
 	}
 
 	public static void normalGameModeSetup() {
-
+		//set up game menu
 		root = new Pane();
-
 		mainScene = new Scene(root, appW, appH);
-
 		rect = new Rectangle(4 * CUBESIZE, border, CUBESIZE, CUBESIZE);
 		rect.setFill(Color.DARKOLIVEGREEN);
 		recList.add(0, rect);
@@ -542,7 +554,8 @@ public class Main extends Application {
 			body.setFill(Color.OLIVEDRAB);
 			recList.add(body);
 		}
-
+		
+		//adds food
 		food = new Rectangle(CUBESIZE, CUBESIZE);
 		root.getChildren().add(food);
 		food.setFill(Color.WHITE);
@@ -554,39 +567,42 @@ public class Main extends Application {
 		Title.setX(appW - 180);
 		Title.setY(50);
 		Title.setText("Hungry\nSlug");
-		Title.setFont(Font.font("Bangla MN", 32));
-
+		Title.setFont(Font.font("Bangla MN", 30));
+		
+		//time display
 		timedisp = new Text();
 		root.getChildren().add(timedisp);
 		timedisp.setX(appW - 175);
-		timedisp.setY(appH / 4 - 50);
+		timedisp.setY(appH / 4 );
 		timedisp.setText("Time: " + min + ":" + String.format("%02d", sec));
-
+		
+		//scoreBox
 		scoreBox = new Text();
 		root.getChildren().add(scoreBox);
 		scoreBox.setX(appW - 175);
-		scoreBox.setY(appH / 4);
+		scoreBox.setY(appH / 4 + 25);
 		scoreBox.setText("Score: " + score + "");
 
 		// highscore display
 		hSDisp = new Text();
 		root.getChildren().add(hSDisp);
 		hSDisp.setX(appW - 175);
-		hSDisp.setY(appH / 4 + 25);
+		hSDisp.setY(appH / 4 + 75);
 		hSDisp.setText("Highscores: \n1. " + finalTable[0] + "\n2. " + finalTable[1] + "\n3. " + finalTable[2]);
-
+	
+		//control menu
 		controls = new Text();
 		root.getChildren().add(controls);
 		controls.setX(appW - 175);
 		controls.setY(appH / 2);
 		controls.setText("Controls: \n\nUp: up arrow or w \n\nDown: down arrow or s "
 				+ "\n\nLeft: left arrow or a \n\nRight: right arrow or d \n\nPause: P ");
-
+		
+		//Initial variables
 		commence = false;
 		needFood = true;
-		h = false;
-		v = false;
 		score = 0;
+		
 		// makes grid on screen
 		for (int i = 0; i < numRowCol; i++) {
 			for (int j = 0; j < numRowCol; j++) {
@@ -611,11 +627,12 @@ public class Main extends Application {
 		l.setFill(Color.WHITE);
 		root.getChildren().addAll(t, b, r, l);
 
-		// pause
+		// pause overlay 
 		root.getChildren().add(pause);
 		pause.setFill(Color.GREY);
 		pause.setOpacity(0);
-
+	
+		// pause alert
 		pausealrt = new Label();
 		pausealrt.setTextAlignment(TextAlignment.CENTER);
 		root.getChildren().add(pausealrt);
@@ -625,8 +642,9 @@ public class Main extends Application {
 		pausealrt.setVisible(false);
 		pausealrt.layoutXProperty().bind(root.widthProperty().subtract(pausealrt.widthProperty()).divide(2));
 		pausealrt.layoutYProperty()
-				.bind(root.heightProperty().subtract(pausealrt.heightProperty()).divide(2).subtract(35));
-
+					.bind(root.heightProperty().subtract(pausealrt.heightProperty()).divide(2).subtract(35));
+		
+		// pause instructions
 		prompt = new Label();
 		prompt.setTextAlignment(TextAlignment.CENTER);
 		root.getChildren().add(prompt);
@@ -655,7 +673,7 @@ public class Main extends Application {
 			homePane.getRowConstraints().add(row);
 		}
 
-		// Normal mode
+		// Normal mode buton and text
 		normal = new Button();
 		normal.setText("Normal");
 		homePane.add(normal, 0, 1);
@@ -677,21 +695,20 @@ public class Main extends Application {
 		olabel.setText("Choose a Game Mode");
 		olabel.setFont(Font.font("Bangla MN", 20));
 		olabel.setTextFill(Color.WHITE);
-
+		GridPane.setColumnSpan(olabel, 2);
+		GridPane.setHalignment(olabel, HPos.CENTER);
+		GridPane.setValignment(olabel, VPos.BOTTOM);
+		
+		// Title
 		title = new Label();
 		title.setText("Hungry Slug");
 		title.setFont(Font.font("Bangla MN", 50));
 		title.setTextFill(Color.WHITE);
-
-		homePane.getChildren().addAll(olabel, title);
-		GridPane.setColumnSpan(olabel, 2);
-		GridPane.setHalignment(olabel, HPos.CENTER);
-		GridPane.setValignment(olabel, VPos.BOTTOM);
-
 		GridPane.setColumnSpan(title, 2);
 		GridPane.setHalignment(title, HPos.CENTER);
 		GridPane.setValignment(title, VPos.TOP);
 
+		homePane.getChildren().addAll(olabel, title);
 	}
 
 	// method that writes the score of the game to the text file
